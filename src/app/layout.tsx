@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import "./lib/envSetup";
+import Providers from "./providers";
+
+export const metadata: Metadata = {
+  title: "r0",
+  description: "r0 is a demo app from OpenAI.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`antialiased`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
