@@ -15,6 +15,8 @@ import { useEditorStore } from "@/store"
 import { useTranscript } from "@/app/contexts/TranscriptContext"
 import { useParams } from "next/navigation"
 import { useState } from "react"
+import { SelfContainedTimer } from "./TimerDisplay"
+import { formatTime } from "@/lib/timer-utils"
 
 type CommandBarProps = {
   testResults?: Array<{
@@ -23,10 +25,15 @@ type CommandBarProps = {
     stderr?: string;
     compileOutput?: string;
   }>;
+  sessionStartedAt?: string | null;
+  durationMinutes?: number;
+  onTimeExpired?: () => void;
 }
 
-export default function CommandBar({ testResults }: CommandBarProps) {
-  const { micStatus, toggleMic, code, language } = useEditorStore()
+export default function CommandBar({ testResults, sessionStartedAt, durationMinutes = 30, onTimeExpired }: CommandBarProps) {
+  // Only subscribe to the specific store values we need - NOT code
+  const micStatus = useEditorStore((s) => s.micStatus)
+  const toggleMic = useEditorStore((s) => s.toggleMic)
   const { transcriptItems } = useTranscript()
   const params = useParams()
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
@@ -38,10 +45,21 @@ export default function CommandBar({ testResults }: CommandBarProps) {
       // Get sessionId from URL params
       const sessionId = params.sessionId as string
       
-      // Format transcript - only keep role and message content
+      // Get code and language from store at submission time (not subscribed)
+      const { code, language } = useEditorStore.getState()
+      
+      // Format transcript with elapsed time from session start
+      const sessionStartMs = sessionStartedAt ? new Date(sessionStartedAt).getTime() : null
       const transcript = transcriptItems
         .filter(item => item.type === "MESSAGE" && !item.isHidden)
-        .map(item => `${item.role}: ${item.title}`)
+        .map(item => {
+          if (sessionStartMs && item.createdAtMs) {
+            const elapsedSeconds = Math.floor((item.createdAtMs - sessionStartMs) / 1000)
+            const timestamp = formatTime(Math.max(0, elapsedSeconds))
+            return `[${timestamp}] ${item.role}: ${item.title}`
+          }
+          return `${item.role}: ${item.title}`
+        })
         .join("\n")
       
       console.log('=== Sending to Report API ===');
@@ -55,7 +73,7 @@ export default function CommandBar({ testResults }: CommandBarProps) {
       const startTime = transcriptItems[0]?.createdAtMs || Date.now()
       const endTime = Date.now()
       const durationMs = endTime - startTime
-      const durationMinutes = Math.floor(durationMs / 60000)
+      const calcDurationMinutes = Math.floor(durationMs / 60000)
       const durationSeconds = Math.floor((durationMs % 60000) / 1000)
       
       // Send to report endpoint
@@ -71,7 +89,7 @@ export default function CommandBar({ testResults }: CommandBarProps) {
           metadata: {
             questionUri: params.name as string,
             language,
-            duration: `${durationMinutes}m ${durationSeconds}s`,
+            duration: `${calcDurationMinutes}m ${durationSeconds}s`,
           }
         })
       })
@@ -92,7 +110,16 @@ export default function CommandBar({ testResults }: CommandBarProps) {
   }
 
   return (
-    <div className="w-full h-12 flex items-center justify-center bg-[#F0F0F0] text-foreground">
+    <div className="w-full h-12 flex items-center justify-between px-4 bg-[#F0F0F0] text-foreground">
+      {sessionStartedAt ? (
+        <SelfContainedTimer 
+          startedAt={sessionStartedAt} 
+          durationMinutes={durationMinutes}
+          onTimeExpired={onTimeExpired}
+        />
+      ) : (
+        <div />
+      )}
       <div className="flex flex-row gap-2">
         <AlertDialog>
           <AlertDialogTrigger asChild>

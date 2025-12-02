@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import type { User } from '@supabase/supabase-js'
 
-const defaultSnippet = `bhosdike`
+const defaultSnippet = `default`
 
 const defaultOutput = "Run your code to see the output here."
 

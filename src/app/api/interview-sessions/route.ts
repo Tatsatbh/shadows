@@ -1,6 +1,48 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
+// GET - Validate that a session exists and belongs to the user
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const sessionId = request.nextUrl.searchParams.get("sessionId")
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Missing sessionId" }, { status: 400 })
+    }
+
+    // Check if session exists and belongs to this user
+    const { data: session, error: sessionError } = await supabase
+      .from("sessions")
+      .select("id, user_id, status, started_at")
+      .eq("id", sessionId)
+      .single()
+
+    if (sessionError || !session) {
+      return NextResponse.json({ valid: false, reason: "not_found" })
+    }
+
+    // Verify the session belongs to this user
+    if (session.user_id !== user.id) {
+      return NextResponse.json({ valid: false, reason: "unauthorized" })
+    }
+
+    return NextResponse.json({ valid: true, session })
+  } catch (error) {
+    console.error("Session validation error:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient()

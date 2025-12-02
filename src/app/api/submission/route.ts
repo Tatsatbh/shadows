@@ -5,6 +5,7 @@ interface SubmissionRequest {
     code: string
     questionUri: string
     sessionId: string
+    timestamp?: number
 }
 
 function toBase64(str: string): string {
@@ -91,6 +92,7 @@ export async function GET(request: Request) {
         const questionId = url.searchParams.get('questionId')
         const code = url.searchParams.get('code')
         const language = url.searchParams.get('language')
+        const timestamp = url.searchParams.get('timestamp')
         
         if (!tokens) {
             return Response.json({ error: "Missing tokens" }, { status: 400 })
@@ -144,6 +146,7 @@ export async function GET(request: Request) {
                     session_id: sessionId,
                     language,
                     code,
+                    timestamp: timestamp ? parseInt(timestamp) : null,
                     result_json: {
                         ...judgeResponse,
                         submissions: decodedSubmissions

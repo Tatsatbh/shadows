@@ -1,10 +1,5 @@
 "use client"
 
-import {
-  LANGUAGE_OPTIONS,
-  LanguageSelector,
-} from "@/app/components/LanguageSelector"
-import { Button } from "@/components/ui/button"
 import { Editor } from "@monaco-editor/react"
 import {
   useCallback,
@@ -24,6 +19,8 @@ import type { SessionStatus } from "@/app/types"
 import type { RealtimeAgent } from "@openai/agents/realtime"
 import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "@/components/ui/resizable"
 import {useHotkeys} from 'react-hotkeys-hook'
+import { useSessionTimer } from "@/hooks/useSessionTimer"
+import TimeExpiredModal from "@/components/app/TimeExpiredModal"
 type LanguageMeta = {
   judgeId: number
 }
@@ -72,36 +69,83 @@ type TestCaseResult = {
   stderr?: string;
 }
 
+const SESSION_DURATION_MINUTES = 15
+
 function EditorWithRealtime() {
 
   const [testCaseResults, setTestCaseResults] = useState<TestCaseResult[]>([])
   const [expandedTestCases, setExpandedTestCases] = useState<Set<number>>(new Set())
   const [showLeaveWarning, setShowLeaveWarning] = useState(false)
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
+  const [sessionValidated, setSessionValidated] = useState(false)
+  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
+  const [isAutoSubmitting, setIsAutoSubmitting] = useState(false)
   const params = useParams()
   const router = useRouter()
   const sessionId = params.sessionId as string
   const language = useEditorStore((s) => s.language)
   const questionText = useQuestionStore((s) => s.questionText)
+  const { addTranscriptBreadcrumb, transcriptItems } = useTranscript()
+  const { logClientEvent, logServerEvent } = useEvent()
 
-  const { data: starterCode, isLoading, isError, error } = useQuery({
+  const { data: starterCode } = useQuery({
     queryKey: ['language', language],
-    queryFn: () => fetchStarterCode(language, params.name as string)
+    queryFn: () => fetchStarterCode(language, params.name as string),
+    enabled: sessionValidated
   })
 
   const { data: testCasesMetadata } = useQuery({
     queryKey: ['testCases', params.name],
-    queryFn: () => fetchTestCasesMetadata(params.name as string)
+    queryFn: () => fetchTestCasesMetadata(params.name as string),
+    enabled: sessionValidated
   })
 
   useEffect(() => {
     setCode(starterCode?.code ?? defaultSnippet)
   }, [language, starterCode?.code])
 
-  // Create session on mount
+  // Validate and create session on mount
   useEffect(() => {
-    const createSession = async () => {
+    const validateAndCreateSession = async () => {
       try {
+        // First check if session already exists and belongs to user
+        const validateRes = await fetch(`/api/interview-sessions?sessionId=${sessionId}`)
+        const validateData = await validateRes.json()
+
+        if (validateData.valid) {
+          // Session exists and belongs to user - check if it's not abandoned/completed
+          const sessionStatus = validateData.session?.status
+          if (sessionStatus === 'abandoned' || sessionStatus === 'completed') {
+            console.log(`Session is ${sessionStatus} - redirecting to dashboard`)
+            router.replace('/dashboard')
+            return
+          }
+          // Session is in_progress - allow access (e.g., page refresh)
+          setSessionStartedAt(validateData.session?.started_at)
+          setSessionValidated(true)
+          return
+        }
+
+        // Session doesn't exist - check for creation token from dashboard
+        const sessionToken = sessionStorage.getItem(`session_token_${sessionId}`)
+        if (!sessionToken) {
+          // No token = user tried to access URL directly without going through dashboard
+          console.error('No session token found - direct URL access not allowed')
+          router.replace('/dashboard')
+          return
+        }
+
+        // Token exists - verify it's not too old (5 minute window)
+        const tokenTime = parseInt(sessionToken, 10)
+        const now = Date.now()
+        const fiveMinutes = 5 * 60 * 1000
+        if (now - tokenTime > fiveMinutes) {
+          console.error('Session token expired')
+          sessionStorage.removeItem(`session_token_${sessionId}`)
+          router.replace('/dashboard')
+          return
+        }
+
+        // Valid token - create the session
         const response = await fetch('/api/interview-sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -111,20 +155,27 @@ function EditorWithRealtime() {
           })
         })
 
+        const responseData = await response.json()
+        
         if (!response.ok) {
-          const errorData = await response.json()
-          console.error('Failed to create session:', errorData)
-        } else {
-          const data = await response.json()
-          console.log('Session created successfully:', data)
+          console.error('Failed to create session:', responseData)
+          sessionStorage.removeItem(`session_token_${sessionId}`)
+          router.replace('/dashboard')
+          return
         }
+
+        // Clear the token after successful creation (one-time use)
+        sessionStorage.removeItem(`session_token_${sessionId}`)
+        setSessionStartedAt(responseData.session?.started_at || new Date().toISOString())
+        setSessionValidated(true)
       } catch (error) {
-        console.error('Error creating session:', error)
+        console.error('Error validating/creating session:', error)
+        router.replace('/dashboard')
       }
     }
 
-    createSession()
-  }, [sessionId, params.name])
+    validateAndCreateSession()
+  }, [sessionId, params.name, router])
 
   // Warn user before leaving page during active session
   useEffect(() => {
@@ -182,8 +233,68 @@ function EditorWithRealtime() {
 
   const handleCancelLeave = () => {
     setShowLeaveWarning(false)
-    setPendingNavigation(null)
   }
+
+  // Auto-submit handler for when timer expires
+  const handleAutoSubmit = useCallback(async () => {
+    if (isAutoSubmitting) return
+    setIsAutoSubmitting(true)
+    
+    try {
+      // Format transcript with elapsed timestamps
+      const sessionStartMs = sessionStartedAt ? new Date(sessionStartedAt).getTime() : null
+      const transcript = transcriptItems
+        .filter(item => item.type === "MESSAGE" && !item.isHidden)
+        .map(item => {
+          if (sessionStartMs && item.createdAtMs) {
+            const elapsedSeconds = Math.floor((item.createdAtMs - sessionStartMs) / 1000)
+            const mins = Math.floor(elapsedSeconds / 60)
+            const secs = elapsedSeconds % 60
+            const timestamp = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+            return `[${timestamp}] ${item.role}: ${item.title}`
+          }
+          return `${item.role}: ${item.title}`
+        })
+        .join("\n")
+      
+      // Send to report endpoint
+      const response = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          transcript,
+          code: useEditorStore.getState().code,
+          questionUri: params.name as string,
+          testResults: testCaseResults || [],
+          metadata: {
+            questionUri: params.name as string,
+            language: useEditorStore.getState().language,
+            duration: '30m 0s',
+            autoSubmitted: true,
+          }
+        })
+      })
+      
+      if (response.ok) {
+        window.location.href = `/report/${sessionId}`
+      } else {
+        console.error('Failed to generate report:', await response.text())
+        setIsAutoSubmitting(false)
+      }
+    } catch (error) {
+      console.error('Error during auto-submit:', error)
+      setIsAutoSubmitting(false)
+    }
+  }, [isAutoSubmitting, sessionId, params.name, testCaseResults, transcriptItems, sessionStartedAt])
+
+  // Timer hook - only active when session is validated and has started_at
+  const timerEnabled = sessionValidated && sessionStartedAt !== null
+  const { formattedTime, timerStyle, isExpired } = useSessionTimer({
+    startedAt: sessionStartedAt || new Date().toISOString(),
+    durationMinutes: SESSION_DURATION_MINUTES,
+    onTimeExpired: handleAutoSubmit,
+  })
 
   const setLanguage = useEditorStore((s) => s.setLanguage)
   const code = useEditorStore((s) => s.code)
@@ -199,9 +310,6 @@ function EditorWithRealtime() {
   )
   const [isPTTActive, setIsPTTActive] = useState(false)
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState(false)
-
-  const { addTranscriptBreadcrumb } = useTranscript()
-  const { logClientEvent, logServerEvent } = useEvent()
 
   const handleConnectionChange = useCallback(
     (status: SessionStatus) => {
@@ -222,7 +330,6 @@ function EditorWithRealtime() {
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(() => {
-        // Permission granted, keep as DISABLED initially
       })
       .catch((err) => {
         console.error("Microphone permission check failed:", err)
@@ -325,6 +432,12 @@ function EditorWithRealtime() {
           },
         })
 
+        // Check if cancelled during async connect
+        if (cancelled) {
+          disconnect()
+          return
+        }
+
         const turnDetection = isPTTActiveRef.current
           ? null
           : {
@@ -344,11 +457,15 @@ function EditorWithRealtime() {
 
         // Trigger the agent to speak first
         setTimeout(() => {
-          sendEvent({
-            type: "response.create",
-          })
+          if (!cancelled) {
+            sendEvent({
+              type: "response.create",
+            })
+          }
         }, 500)
       } catch (err) {
+        // Ignore errors if component was unmounted during connection
+        if (cancelled) return
         console.error("Realtime connect (editor) failed:", err)
         setSessionStatus("DISCONNECTED")
       }
@@ -481,6 +598,11 @@ function EditorWithRealtime() {
 
     try {
 
+      // Calculate elapsed time from session start
+      const elapsedSeconds = sessionStartedAt 
+        ? Math.floor((Date.now() - new Date(sessionStartedAt).getTime()) / 1000)
+        : 0;
+
       const submitRes = await fetch('/api/submission', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -488,7 +610,8 @@ function EditorWithRealtime() {
           judgeId: languageMeta.judgeId,
           code: finalSource,
           questionUri: params.name as string,
-          sessionId: sessionId
+          sessionId: sessionId,
+          timestamp: elapsedSeconds
         })
       });
 
@@ -519,7 +642,8 @@ function EditorWithRealtime() {
           sessionId,
           questionId,
           code: submittedCode,
-          language
+          language,
+          timestamp: elapsedSeconds.toString()
         });
 
         const resultsRes = await fetch(`/api/submission?${queryParams}`);
@@ -580,6 +704,16 @@ function EditorWithRealtime() {
     event.preventDefault();
     toggleMic();
   }, {enableOnFormTags: true})
+
+  // Show loading while validating session
+  if (!sessionValidated) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="text-muted-foreground">Loading session...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-screen w-full flex flex-col">
       <AlertDialog open={showLeaveWarning} onOpenChange={setShowLeaveWarning}>
@@ -611,7 +745,16 @@ function EditorWithRealtime() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <CommandBar testResults={testCaseResults} />
+      <TimeExpiredModal 
+        isOpen={isExpired && timerEnabled} 
+        onAutoSubmit={handleAutoSubmit} 
+      />
+      <CommandBar 
+        testResults={testCaseResults}
+        sessionStartedAt={timerEnabled ? sessionStartedAt : null}
+        durationMinutes={SESSION_DURATION_MINUTES}
+        onTimeExpired={handleAutoSubmit}
+      />
       <ResizablePanelGroup
         direction="horizontal"
         className="w-full h-screen rounded-lg border md:min-w-[450px]"

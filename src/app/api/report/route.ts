@@ -74,6 +74,32 @@ export async function POST(req: NextRequest) {
     const passedTests = enrichedTestResults.filter(t => t.status === 'passed').length;
     const failedTests = enrichedTestResults.filter(t => t.status === 'failed').length;
 
+    // Fetch all submissions for this session to analyze diffs
+    const { data: submissions, error: submissionsError } = await supabase
+      .from('submissions')
+      .select('id, code, created_at, result_json')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+
+    if (submissionsError) {
+      console.error('Failed to fetch submissions:', submissionsError);
+    }
+
+    // Build submission timeline with diffs for AI analysis
+    const subs = submissions || [];
+    const submissionTimeline = subs.map((sub, i) => {
+      const prevCode = i > 0 ? subs[i - 1].code : 
+      const testsPassed = sub.result_json?.submissions?.filter((r: any) => r.status?.id === 3).length || 0;
+      const totalTestsInSub = sub.result_json?.submissions?.length || 0;
+      return {
+        submissionNumber: i + 1,
+        timestamp: sub.created_at,
+        testsPassed: `${testsPassed}/${totalTestsInSub}`,
+        code: sub.code,
+        diff: prevCode ? `Changed from previous submission` : 'Initial submission',
+      };
+    }).slice(-5); // Only include last 5 submissions to save tokens
+
     // Log all content lengths for debugging
     console.log('=== Content Stats ===');
     console.log('Transcript length:', transcript.length, 'chars');
@@ -136,6 +162,13 @@ For each dimension, provide:
 
 Finally, provide an overall recommendation: "Strong Hire", "Hire", "Maybe", or "No Hire"
 
+Submission Timeline (${submissionTimeline.length} submissions):
+${submissionTimeline.map((s, i) => 
+  `--- Submission #${s.submissionNumber} (${s.testsPassed} tests passed) ---\n\`\`\`\n${s.code.slice(0, 1500)}\n\`\`\``
+).join('\n\n')}
+
+For each submission, provide a brief comment on what changed and why (debugging insight, optimization, bug fix, etc).
+
 Return your response as a JSON object with this structure:
 {
   "dimensions": {
@@ -145,7 +178,8 @@ Return your response as a JSON object with this structure:
     "debugging": { "score": number, "evidence": string, "reasoning": string }
   },
   "overallRecommendation": string,
-  "summary": string
+  "summary": string,
+  "submissionComments": [{ "submissionNumber": number, "comment": string }]
 }`;
 
     // Call OpenAI with reasoning enabled

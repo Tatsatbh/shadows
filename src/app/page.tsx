@@ -1,16 +1,22 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { FlipImages } from "@/components/ui/flip-images"
+import { FlipWords } from "@/components/ui/flip-words"
 import { HeroPreview } from "@/components/app/HeroPreview"
 import { InfiniteCarousel } from "@/components/ui/infinite-carousel"
 import { SignInDialog } from "@/components/app/SignInDialog"
 import Link from "next/link"
+import localFont from 'next/font/local'
 
 import { Poppins } from 'next/font/google'
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700']
+})
+
+const jetbrainsMono = localFont({
+  src: '../../public/fonts/jetbrainsmono.ttf',
+  variable: '--font-jetbrains-mono',
 })
 
 export default function LandingPage() {
@@ -49,30 +55,11 @@ export default function LandingPage() {
               Live AI coding mock interviews
               <br />
               <span className="flex items-center gap-3 flex-wrap">
-                with questions asked by
-                <FlipImages
-                  images={[
-                    { src: "/google.png", alt: "Google" },
-                    { src: "/amazon.svg", alt: "Amazon" },
-                    { src: "/meta.png", alt: "Meta" },
-                    { src: "/microsoft.png", alt: "Microsoft" },
-                    { src: "/netflix.png", alt: "netflix" }
-                  ]}
+                with questions featured in
+                <FlipWords
+                  words={["Neetcode 150", "Blind 75", "Neecode 250", "Top Interview 150"]}
                   duration={2500}
-                  imageClassName="h-6 sm:h-8 md:h-10 w-auto"
-                  sizeMultipliers={{
-                    "google.png": 1.15,
-                    "amazon.svg": 1.0,
-                    "meta.png": 2.2,
-                    "microsoft.png": 0.9,
-                  }}
-                  paddingMultipliers={{
-                    "google.png": { top: 4, right: 4, bottom: 0, left: 8 },
-                    "amazon.svg": { top: 8, right: 2, bottom: 0, left: 4 },
-                    "meta.png": { top: 0, right: 0, bottom: 0, left: 12 },
-                    "microsoft.png": { top: 0, right: 0, bottom: 0, left: 0 },
-                    "netflix.png": { top: 0, right: 4, bottom: 0, left: 3 }
-                  }}
+                  className={`${jetbrainsMono.className} font-bold px-0`}
                 />
               </span>
             </h1>

@@ -23,19 +23,15 @@ import {
 import { InterviewCard } from "@/components/interview-card"
 import { SessionsTable } from "@/components/sessions-table"
 import { createClient } from "@/lib/supabase/client"
+import { ThemeToggle } from "@/components/theme-toggle"
 
-// Temporary company mapping for MVP - all companies for all problems
-const ALL_COMPANIES = ['amazon', 'google', 'meta', 'microsoft', 'netflix']
+
 
 export default function Page() {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
   
-  const { data: problems, isLoading, error } = useQuery({
-    queryKey: ["problems"],
-    queryFn: fetchProblems,
-  })
-
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient()
@@ -44,12 +40,19 @@ export default function Page() {
       if (!user) {
         router.replace('/')
       } else {
+        setUserId(user.id)
         setIsChecking(false)
       }
     }
     
     checkAuth()
   }, [router])
+
+  const { data: problems, isLoading, error } = useQuery({
+    queryKey: ["problems"],
+    queryFn: () => fetchProblems(),
+    enabled: !!userId,
+  })
 
   if (isChecking) {
     return null
@@ -59,7 +62,7 @@ export default function Page() {
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
+        <header className="flex h-16 shrink-0 items-center gap-2 justify-between">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -77,28 +80,31 @@ export default function Page() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <div className="px-4">
+            <ThemeToggle />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             {isLoading && <p>Loading problems...</p>}
             {error && <p>Error loading problems: {error.message}</p>}
-            {problems?.map((problem) => (
+            {problems?.map((problem: any) => (
               <InterviewCard
                 key={problem.id}
                 questionNumber={problem.question_number}
                 title={problem.title}
                 difficulty={problem.difficulty}
                 questionUri={problem.question_uri}
-                companies={ALL_COMPANIES}
                 onClick={() => {
                   const sessionId = nanoid()
+                  // Store session creation token to prevent direct URL access
+                  sessionStorage.setItem(`session_token_${sessionId}`, Date.now().toString())
                   router.push(`/problems/${problem.question_uri}/${sessionId}`)
                 }}
               />
             ))}
           </div>
-          <div className="flex flex-col gap-4 p-6 rounded-xl bg-muted/50">
-            <h2 className="text-2xl font-semibold">Recent Sessions</h2>
+          <div className="rounded-xl border bg-card">
             <SessionsTable limit={10} />
           </div>
         </div>

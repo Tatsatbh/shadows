@@ -14,6 +14,18 @@ import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+type Session = {
+  id: string
+  status: "in_progress" | "completed" | "abandoned"
+  started_at: string
+  ended_at: string | null
+  questions: {
+    question_number: number
+    title: string
+    difficulty: "Easy" | "Medium" | "Hard"
+  } | null
+}
+
 interface SessionsTableProps {
   limit?: number
 }
@@ -33,7 +45,7 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
     getUserId()
   }, [])
 
-  const { data: sessions, isLoading, error } = useQuery({
+  const { data: sessions, isLoading } = useQuery({
     queryKey: ["recentSessions", userId, limit],
     queryFn: () => fetchRecentSessions(userId!, limit),
     enabled: !!userId,
@@ -44,7 +56,6 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     })
@@ -56,20 +67,7 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
     const end = new Date(endedAt)
     const durationMs = end.getTime() - start.getTime()
     const minutes = Math.floor(durationMs / 60000)
-    return `${minutes} min`
-  }
-
-  const getStatusBadge = (status: string) => {
-    const statusColors = {
-      completed: 'bg-green-100 text-green-800',
-      in_progress: 'bg-blue-100 text-blue-800',
-      abandoned: 'bg-gray-100 text-gray-800'
-    }
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
-        {status.replace('_', ' ')}
-      </span>
-    )
+    return `${minutes}m`
   }
 
   const getDifficultyBadge = (difficulty: string) => {
@@ -86,51 +84,60 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
   }
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading sessions...</div>
-  }
-
-  if (error) {
-    return <div className="text-sm text-destructive">Error loading sessions</div>
+    return <div className="text-sm text-muted-foreground">Loading...</div>
   }
 
   if (!sessions || sessions.length === 0) {
-    return <div className="text-sm text-muted-foreground">No recent sessions found</div>
+    return <div className="text-sm text-muted-foreground">No sessions yet. Start solving problems!</div>
   }
 
   return (
-    <div className="rounded-md border">
+    <div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Problem</TableHead>
             <TableHead>Difficulty</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Problem</TableHead>
+            <TableHead className="hidden sm:table-cell">Status</TableHead>
             <TableHead>Started</TableHead>
-            <TableHead>Duration</TableHead>
+            <TableHead className="text-right hidden md:table-cell">Duration</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sessions.map((session: any) => (
-            <TableRow 
-              key={session.id}
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => router.push(`/problems/${session.questions?.title?.toLowerCase().replace(/\s+/g, '-')}/${session.id}`)}
-            >
-              <TableCell className="font-medium">
-                {session.questions?.question_number}. {session.questions?.title}
-              </TableCell>
-              <TableCell>
-                {session.questions?.difficulty && getDifficultyBadge(session.questions.difficulty)}
-              </TableCell>
-              <TableCell>{getStatusBadge(session.status)}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {formatDate(session.started_at)}
-              </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {getDuration(session.started_at, session.ended_at)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {sessions.map((session: any) => {
+            const isAbandoned = session.status === 'abandoned'
+            return (
+              <TableRow 
+                key={session.id}
+                className={isAbandoned ? 'opacity-50 cursor-not-allowed h-16' : 'cursor-pointer hover:bg-muted/50 h-16'}
+                onClick={() => {
+                  if (isAbandoned) return
+                  if (session.status === 'completed') {
+                    window.open(`/report/${session.id}`, '_blank', 'noopener,noreferrer')
+                  } else {
+                    const questionUri = session.questions?.title?.toLowerCase().replace(/\s+/g, '-') || ''
+                    router.push(`/problems/${questionUri}/${session.id}`)
+                  }
+                }}
+              >
+                <TableCell className="py-4">
+                  {session.questions?.difficulty && getDifficultyBadge(session.questions.difficulty)}
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="font-medium">
+                    {session.questions?.question_number}. {session.questions?.title}
+                  </div>
+                </TableCell>
+                <TableCell className="capitalize py-4 hidden sm:table-cell">
+                  {session.status.replace('_', ' ')}
+                </TableCell>
+                <TableCell className="py-4">{formatDate(session.started_at)}</TableCell>
+                <TableCell className="text-right py-4 hidden md:table-cell">
+                  {getDuration(session.started_at, session.ended_at)}
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>

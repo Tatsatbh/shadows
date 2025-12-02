@@ -151,8 +151,15 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
   );
 
   const disconnect = useCallback(() => {
-    sessionRef.current?.close();
-    sessionRef.current = null;
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.close();
+      } catch (err) {
+        // Ignore errors during cleanup - connection may already be closed
+        console.debug('Session close error (safe to ignore):', err);
+      }
+      sessionRef.current = null;
+    }
     updateStatus('DISCONNECTED');
   }, [updateStatus]);
 
