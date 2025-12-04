@@ -7,8 +7,6 @@ body {
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -45,43 +43,64 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  /* Shadows.sh - Luxurious Dark Mode */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* The Void (Backgrounds) */
+    --background: 240 10% 3.9%;           /* #09090b - Zinc 950 */
+    --foreground: 0 0% 98%;               /* #fafafa - Zinc 50 */
+    
+    /* Card Surface */
+    --card: 240 6% 7%;                    /* #121214 - Custom card surface */
+    --card-foreground: 0 0% 98%;          /* #fafafa */
+    
+    /* Elevated Surface (Modals/Dropdowns) */
+    --popover: 240 5.9% 10%;              /* #18181b - Zinc 900 */
+    --popover-foreground: 0 0% 98%;       /* #fafafa */
+    
+    /* Primary - White buttons with black text */
+    --primary: 0 0% 100%;                 /* #ffffff - Pure white */
+    --primary-foreground: 240 10% 3.9%;   /* #09090b - Black text */
+    
+    /* Secondary */
+    --secondary: 240 5.9% 10%;            /* #18181b - Zinc 900 */
+    --secondary-foreground: 0 0% 98%;     /* #fafafa */
+    
+    /* Muted */
+    --muted: 240 5.9% 10%;                /* #18181b - Zinc 900 */
+    --muted-foreground: 240 5% 64.9%;     /* #a1a1aa - Zinc 400 */
+    
+    /* Accent */
+    --accent: 240 5.9% 10%;               /* #18181b - Zinc 900 */
+    --accent-foreground: 0 0% 98%;        /* #fafafa */
+    
+    /* Destructive - Rose 500 */
+    --destructive: 350 89% 60%;           /* #f43f5e - Rose 500 */
+    --destructive-foreground: 0 0% 98%;   /* #fafafa */
+    
+    /* The Edge (Borders) */
+    --border: 240 3.7% 15.9%;             /* #27272a - Zinc 800 */
+    --input: 240 3.7% 15.9%;              /* #27272a - Zinc 800 */
+    --ring: 0 0% 100%;                    /* #ffffff - White ring */
+    
+    /* Charts - Using indicator colors */
+    --chart-1: 350 89% 60%;               /* Rose 500 - Danger */
+    --chart-2: 160 84% 39%;               /* Emerald 500 - Success */
+    --chart-3: 239 84% 67%;               /* Indigo 500 - Voice */
+    --chart-4: 240 5% 64.9%;              /* Zinc 400 - Muted */
+    --chart-5: 0 0% 98%;                  /* Zinc 50 - Light */
+    
+    /* Sidebar - Elevated surface for contrast */
+    --sidebar-background: 240 5.9% 10%;   /* #18181b - Zinc 900 (elevated) */
+    --sidebar-foreground: 0 0% 98%;       /* #fafafa */
+    --sidebar-primary: 0 0% 100%;         /* #ffffff */
+    --sidebar-primary-foreground: 240 10% 3.9%;
+    --sidebar-accent: 240 6% 7%;          /* #121214 - Card surface */
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;     /* #27272a - Zinc 800 */
+    --sidebar-ring: 0 0% 100%;            /* #ffffff */
   }
 }
-
-
 
 @layer base {
   * {
@@ -89,5 +108,27 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Shadows.sh Utility Classes */
+@layer utilities {
+  /* Live pulse animation for danger indicator */
+  .pulse-live {
+    animation: pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-live {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  /* Glow text effect for brand elements */
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
   }
 }

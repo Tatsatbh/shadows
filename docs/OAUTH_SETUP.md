@@ -18,7 +18,7 @@ This guide walks you through configuring Google and GitHub OAuth providers in yo
 4. Click **Create Credentials** > **OAuth client ID**
 5. Configure the OAuth consent screen if prompted:
    - User Type: External
-   - App name: RoundsRobin
+   - App name: Shadows
    - User support email: Your email
    - Developer contact: Your email
 6. Select **Application type**: Web application
@@ -47,7 +47,7 @@ This guide walks you through configuring Google and GitHub OAuth providers in yo
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click **New OAuth App**
 3. Fill in the application details:
-   - Application name: RoundsRobin
+   - Application name: Shadows
    - Homepage URL: `https://your-domain.com` (or `http://localhost:3000` for development)
    - Authorization callback URL: `https://<your-project-ref>.supabase.co/auth/v1/callback`
 4. Click **Register application**

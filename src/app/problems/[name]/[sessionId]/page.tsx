@@ -1,342 +1,194 @@
 "use client"
 
-import { Editor } from "@monaco-editor/react"
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
-import {
-  TranscriptProvider,
-  useTranscript,
-} from "@/app/contexts/TranscriptContext"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { TranscriptProvider, useTranscript } from "@/app/contexts/TranscriptContext"
 import { EventProvider, useEvent } from "@/app/contexts/EventContext"
 import { useRealtimeSession } from "@/app/hooks/useRealtimeSession"
 import { createModerationGuardrail } from "@/app/agentConfigs/guardrails"
 import type { SessionStatus } from "@/app/types"
 import type { RealtimeAgent } from "@openai/agents/realtime"
 import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "@/components/ui/resizable"
-import {useHotkeys} from 'react-hotkeys-hook'
+import { useHotkeys } from "react-hotkeys-hook"
 import { useSessionTimer } from "@/hooks/useSessionTimer"
 import TimeExpiredModal from "@/components/app/TimeExpiredModal"
-type LanguageMeta = {
-  judgeId: number
-}
-import {
-  createInterviewerScenario,
-  interviewerCompanyName,
-} from "@/app/agentConfigs/myAgent"
+import { createInterviewerScenario, interviewerCompanyName } from "@/app/agentConfigs/myAgent"
 import { defaultSnippet, useEditorStore, useQuestionStore } from "@/store"
 import QuestionBar from "@/components/app/QuestionBar"
 import CommandBar from "@/components/app/CommandBar"
-import EditorCommandBar from "@/components/app/EditorCommandBar"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { fetchStarterCode, fetchTestCasesMetadata } from "@/lib/queries"
-import { Badge } from "@/components/ui/badge"
-import { TestCaseBadge } from "@/components/ui/testcase-badge"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-const LANGUAGE_META: Record<string, LanguageMeta> = {
-  javascript: {
-    judgeId: 63,
-  },
-  python: {
-    judgeId: 71,
-  },
-  cpp: {
-    judgeId: 54,
-  },
-}
 
-type TestCaseStatus = "pending" | "passed" | "failed" | "running";
-
-type TestCaseResult = {
-  status: TestCaseStatus;
-  actualOutput?: string;
-  stderr?: string;
-}
+// Extracted hooks and components
+import { useSessionManagement } from "@/hooks/useSessionManagement"
+import { useCodeSubmission } from "@/hooks/useCodeSubmission"
+import { LeaveWarningDialog } from "@/components/app/LeaveWarningDialog"
+import { TestCasesPanel } from "@/components/app/TestCasesPanel"
+import { EditorPanel } from "@/components/app/EditorPanel"
 
 const SESSION_DURATION_MINUTES = 15
 
 function EditorWithRealtime() {
-
-  const [testCaseResults, setTestCaseResults] = useState<TestCaseResult[]>([])
-  const [expandedTestCases, setExpandedTestCases] = useState<Set<number>>(new Set())
-  const [showLeaveWarning, setShowLeaveWarning] = useState(false)
-  const [sessionValidated, setSessionValidated] = useState(false)
-  const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
-  const [isAutoSubmitting, setIsAutoSubmitting] = useState(false)
   const params = useParams()
-  const router = useRouter()
   const sessionId = params.sessionId as string
+  const questionUri = params.name as string
+
+  // Zustand stores
   const language = useEditorStore((s) => s.language)
+  const setLanguage = useEditorStore((s) => s.setLanguage)
+  const code = useEditorStore((s) => s.code)
+  const setCode = useEditorStore((s) => s.setCode)
+  const micStatus = useEditorStore((s) => s.micStatus)
+  const setMicStatus = useEditorStore((s) => s.setMicStatus)
+  const toggleMic = useEditorStore((s) => s.toggleMic)
   const questionText = useQuestionStore((s) => s.questionText)
+
+  // Transcript context
   const { addTranscriptBreadcrumb, transcriptItems } = useTranscript()
   const { logClientEvent, logServerEvent } = useEvent()
 
-  const { data: starterCode } = useQuery({
-    queryKey: ['language', language],
-    queryFn: () => fetchStarterCode(language, params.name as string),
-    enabled: sessionValidated
-  })
+  // Session management hook
+  const {
+    sessionValidated,
+    sessionStartedAt,
+    showLeaveWarning,
+    setShowLeaveWarning,
+    handleConfirmLeave,
+    handleCancelLeave,
+  } = useSessionManagement({ sessionId, questionUri })
 
+  // Data queries
   const { data: testCasesMetadata } = useQuery({
-    queryKey: ['testCases', params.name],
-    queryFn: () => fetchTestCasesMetadata(params.name as string),
-    enabled: sessionValidated
+    queryKey: ["testCases", questionUri],
+    queryFn: () => fetchTestCasesMetadata(questionUri),
+    enabled: sessionValidated,
   })
 
+  // Build test case metadata for agent store
+  const testCaseMetadataForStore = useMemo(() => {
+    if (!testCasesMetadata) return []
+    const visible = testCasesMetadata.visibleTestCases.map((tc) => ({
+      input: tc.input,
+      expectedOutput: tc.expected_output,
+      hidden: false,
+    }))
+    const hidden = testCasesMetadata.hiddenTestCases.map(() => ({
+      input: "[Hidden]",
+      expectedOutput: "[Hidden]",
+      hidden: true,
+    }))
+    return [...visible, ...hidden]
+  }, [testCasesMetadata])
+
+  // Code submission hook
+  const { testCaseResults, isRunning, output, runCode } = useCodeSubmission({
+    sessionId,
+    questionUri,
+    sessionStartedAt,
+    testCaseMetadata: testCaseMetadataForStore,
+  })
+
+  // Starter code query
+  const { data: starterCode } = useQuery({
+    queryKey: ["language", language],
+    queryFn: () => fetchStarterCode(language, questionUri),
+    enabled: sessionValidated,
+  })
+
+  // Update code when language/starter code changes
   useEffect(() => {
     setCode(starterCode?.code ?? defaultSnippet)
-  }, [language, starterCode?.code])
+  }, [language, starterCode?.code, setCode])
 
-  // Validate and create session on mount
-  useEffect(() => {
-    const validateAndCreateSession = async () => {
-      try {
-        // First check if session already exists and belongs to user
-        const validateRes = await fetch(`/api/interview-sessions?sessionId=${sessionId}`)
-        const validateData = await validateRes.json()
-
-        if (validateData.valid) {
-          // Session exists and belongs to user - check if it's not abandoned/completed
-          const sessionStatus = validateData.session?.status
-          if (sessionStatus === 'abandoned' || sessionStatus === 'completed') {
-            console.log(`Session is ${sessionStatus} - redirecting to dashboard`)
-            router.replace('/dashboard')
-            return
-          }
-          // Session is in_progress - allow access (e.g., page refresh)
-          setSessionStartedAt(validateData.session?.started_at)
-          setSessionValidated(true)
-          return
-        }
-
-        // Session doesn't exist - check for creation token from dashboard
-        const sessionToken = sessionStorage.getItem(`session_token_${sessionId}`)
-        if (!sessionToken) {
-          // No token = user tried to access URL directly without going through dashboard
-          console.error('No session token found - direct URL access not allowed')
-          router.replace('/dashboard')
-          return
-        }
-
-        // Token exists - verify it's not too old (5 minute window)
-        const tokenTime = parseInt(sessionToken, 10)
-        const now = Date.now()
-        const fiveMinutes = 5 * 60 * 1000
-        if (now - tokenTime > fiveMinutes) {
-          console.error('Session token expired')
-          sessionStorage.removeItem(`session_token_${sessionId}`)
-          router.replace('/dashboard')
-          return
-        }
-
-        // Valid token - create the session
-        const response = await fetch('/api/interview-sessions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            questionUri: params.name as string
-          })
-        })
-
-        const responseData = await response.json()
-        
-        if (!response.ok) {
-          console.error('Failed to create session:', responseData)
-          sessionStorage.removeItem(`session_token_${sessionId}`)
-          router.replace('/dashboard')
-          return
-        }
-
-        // Clear the token after successful creation (one-time use)
-        sessionStorage.removeItem(`session_token_${sessionId}`)
-        setSessionStartedAt(responseData.session?.started_at || new Date().toISOString())
-        setSessionValidated(true)
-      } catch (error) {
-        console.error('Error validating/creating session:', error)
-        router.replace('/dashboard')
-      }
-    }
-
-    validateAndCreateSession()
-  }, [sessionId, params.name, router])
-
-  // Warn user before leaving page during active session
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault()
-      e.returnValue = "Are you sure you want to leave? Your session will be marked as abandoned."
-      return "Are you sure you want to leave? Your session will be marked as abandoned."
-    }
-
-    window.addEventListener("beforeunload", handleBeforeUnload)
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload)
-    }
-  }, [])
-
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = (e: PopStateEvent) => {
-      e.preventDefault()
-      setShowLeaveWarning(true)
-      // Push state back to prevent immediate navigation
-      window.history.pushState(null, "", window.location.href)
-    }
-
-    // Push initial state
-    window.history.pushState(null, "", window.location.href)
-    window.addEventListener("popstate", handlePopState)
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState)
-    }
-  }, [])
-
-  const handleConfirmLeave = async () => {
-    // Mark session as abandoned
-    try {
-      await fetch('/api/interview-sessions', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          status: 'abandoned'
-        })
-      })
-    } catch (error) {
-      console.error('Error updating session:', error)
-    }
-
-    // Navigate back
-    setShowLeaveWarning(false)
-    window.removeEventListener("beforeunload", () => {})
-    router.push('/dashboard')
-  }
-
-  const handleCancelLeave = () => {
-    setShowLeaveWarning(false)
-  }
+  // Auto-submit state
+  const [isAutoSubmitting, setIsAutoSubmitting] = useState(false)
 
   // Auto-submit handler for when timer expires
   const handleAutoSubmit = useCallback(async () => {
     if (isAutoSubmitting) return
     setIsAutoSubmitting(true)
-    
+
     try {
-      // Format transcript with elapsed timestamps
       const sessionStartMs = sessionStartedAt ? new Date(sessionStartedAt).getTime() : null
       const transcript = transcriptItems
-        .filter(item => item.type === "MESSAGE" && !item.isHidden)
-        .map(item => {
+        .filter((item) => item.type === "MESSAGE" && !item.isHidden)
+        .map((item) => {
           if (sessionStartMs && item.createdAtMs) {
             const elapsedSeconds = Math.floor((item.createdAtMs - sessionStartMs) / 1000)
             const mins = Math.floor(elapsedSeconds / 60)
             const secs = elapsedSeconds % 60
-            const timestamp = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+            const timestamp = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
             return `[${timestamp}] ${item.role}: ${item.title}`
           }
           return `${item.role}: ${item.title}`
         })
         .join("\n")
-      
-      // Send to report endpoint
-      const response = await fetch('/api/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+      const response = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
           transcript,
           code: useEditorStore.getState().code,
-          questionUri: params.name as string,
+          questionUri,
           testResults: testCaseResults || [],
           metadata: {
-            questionUri: params.name as string,
+            questionUri,
             language: useEditorStore.getState().language,
-            duration: '30m 0s',
+            duration: "30m 0s",
             autoSubmitted: true,
-          }
-        })
+          },
+        }),
       })
-      
+
       if (response.ok) {
         window.location.href = `/report/${sessionId}`
       } else {
-        console.error('Failed to generate report:', await response.text())
+        console.error("Failed to generate report:", await response.text())
         setIsAutoSubmitting(false)
       }
     } catch (error) {
-      console.error('Error during auto-submit:', error)
+      console.error("Error during auto-submit:", error)
       setIsAutoSubmitting(false)
     }
-  }, [isAutoSubmitting, sessionId, params.name, testCaseResults, transcriptItems, sessionStartedAt])
+  }, [isAutoSubmitting, sessionId, questionUri, testCaseResults, transcriptItems, sessionStartedAt])
 
-  // Timer hook - only active when session is validated and has started_at
+  // Timer hook
   const timerEnabled = sessionValidated && sessionStartedAt !== null
-  const { formattedTime, timerStyle, isExpired } = useSessionTimer({
+  const { isExpired } = useSessionTimer({
     startedAt: sessionStartedAt || new Date().toISOString(),
     durationMinutes: SESSION_DURATION_MINUTES,
     onTimeExpired: handleAutoSubmit,
   })
 
-  const setLanguage = useEditorStore((s) => s.setLanguage)
-  const code = useEditorStore((s) => s.code)
-  const output = useEditorStore((s) => s.output)
-  const setCode = useEditorStore((s) => s.setCode)
-  const setOutput = useEditorStore((s) => s.setOutput)
-  const [isRunning, setIsRunning] = useState(false)
-  const micStatus = useEditorStore((s) => s.micStatus)
-  const setMicStatus = useEditorStore((s) => s.setMicStatus)
-  const toggleMic = useEditorStore((s) => s.toggleMic)
-  const [sessionStatus, setSessionStatus] = useState<SessionStatus>(
-    "DISCONNECTED"
-  )
+  // Realtime connection state
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>("DISCONNECTED")
   const [isPTTActive, setIsPTTActive] = useState(false)
-  const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState(false)
 
-  const handleConnectionChange = useCallback(
-    (status: SessionStatus) => {
-      setSessionStatus(status)
-    },
-    []
-  )
+  const handleConnectionChange = useCallback((status: SessionStatus) => {
+    setSessionStatus(status)
+  }, [])
 
   const sessionCallbacks = useMemo(
     () => ({ onConnectionChange: handleConnectionChange }),
     [handleConnectionChange]
   )
 
-  const { connect, disconnect, sendEvent, interrupt, mute } =
-    useRealtimeSession(sessionCallbacks)
+  const { connect, disconnect, sendEvent, mute } = useRealtimeSession(sessionCallbacks)
 
   // Check mic permission on mount
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => {
-      })
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(() => {})
       .catch((err) => {
         console.error("Microphone permission check failed:", err)
         setMicStatus("RESTRICTED")
       })
   }, [setMicStatus])
 
+  // Audio element for realtime SDK
   const sdkAudioElement = useMemo(() => {
     if (typeof window === "undefined") return undefined
     const el = document.createElement("audio")
@@ -354,29 +206,26 @@ function EditorWithRealtime() {
     }
   }, [sdkAudioElement])
 
-  const guardrail = useMemo(
-    () => createModerationGuardrail(interviewerCompanyName),
-    []
-  )
-
+  const guardrail = useMemo(() => createModerationGuardrail(interviewerCompanyName), [])
   const scenarioAgents = useMemo<RealtimeAgent[]>(
     () => createInterviewerScenario(questionText),
     [questionText]
   )
 
+  // Refs for stable callbacks
   const isPTTActiveRef = useRef(isPTTActive)
   useEffect(() => {
     isPTTActiveRef.current = isPTTActive
   }, [isPTTActive])
 
   const addTranscriptBreadcrumbRef = useRef(addTranscriptBreadcrumb)
-  type AddBreadcrumbArgs = Parameters<typeof addTranscriptBreadcrumb>
   const safeAddTranscriptBreadcrumb = useCallback(
-    (...args: AddBreadcrumbArgs) => {
+    (...args: Parameters<typeof addTranscriptBreadcrumb>) => {
       addTranscriptBreadcrumbRef.current?.(...args)
     },
     []
   )
+
   const logClientEventRef = useRef(logClientEvent)
   const logServerEventRef = useRef(logServerEvent)
 
@@ -392,16 +241,14 @@ function EditorWithRealtime() {
     logServerEventRef.current = logServerEvent
   }, [logServerEvent])
 
+  // Connect to realtime session
   useEffect(() => {
     if (!sdkAudioElement) return
 
     let cancelled = false
 
     const fetchEphemeralKey = async (): Promise<string | null> => {
-      logClientEventRef.current?.(
-        { url: "/session" },
-        "fetch_session_token_request"
-      )
+      logClientEventRef.current?.({ url: "/session" }, "fetch_session_token_request")
       const tokenResponse = await fetch("/api/session")
       const data = await tokenResponse.json()
       logServerEventRef.current?.(data, "fetch_session_token_response")
@@ -427,12 +274,9 @@ function EditorWithRealtime() {
           initialAgents: scenarioAgents,
           audioElement: sdkAudioElement,
           outputGuardrails: [guardrail],
-          extraContext: {
-            addTranscriptBreadcrumb: safeAddTranscriptBreadcrumb,
-          },
+          extraContext: { addTranscriptBreadcrumb: safeAddTranscriptBreadcrumb },
         })
 
-        // Check if cancelled during async connect
         if (cancelled) {
           disconnect()
           return
@@ -440,79 +284,41 @@ function EditorWithRealtime() {
 
         const turnDetection = isPTTActiveRef.current
           ? null
-          : {
-              type: "server_vad" as const,
-              threshold: 0.9,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 1200,
-              create_response: true,
-            }
+          : { type: "server_vad" as const, threshold: 0.9, prefix_padding_ms: 300, silence_duration_ms: 1200, create_response: true }
 
-        sendEvent({
-          type: "session.update",
-          session: {
-            turn_detection: turnDetection,
-          },
-        })
-
-        // Trigger the agent to speak first
+        sendEvent({ type: "session.update", session: { turn_detection: turnDetection } })
         setTimeout(() => {
-          if (!cancelled) {
-            sendEvent({
-              type: "response.create",
-            })
-          }
+          if (!cancelled) sendEvent({ type: "response.create" })
         }, 500)
       } catch (err) {
-        // Ignore errors if component was unmounted during connection
         if (cancelled) return
-        console.error("Realtime connect (editor) failed:", err)
+        console.error("Realtime connect failed:", err)
         setSessionStatus("DISCONNECTED")
       }
     }
 
     connectSession()
-
     return () => {
       cancelled = true
       disconnect()
     }
-  }, [
-    connect,
-    disconnect,
-    guardrail,
-    scenarioAgents,
-    sdkAudioElement,
-    sendEvent,
-  ])
+  }, [connect, disconnect, guardrail, scenarioAgents, sdkAudioElement, sendEvent, safeAddTranscriptBreadcrumb])
 
+  // Update turn detection when PTT changes
   useEffect(() => {
     if (sessionStatus !== "CONNECTED") return
-
     const turnDetection = isPTTActive
       ? null
-      : {
-        type: "server_vad" as const,
-        threshold: 0.9,
-        prefix_padding_ms: 300,
-        silence_duration_ms: 1200,
-        create_response: true,
-      }
-
-    sendEvent({
-      type: "session.update",
-      session: {
-        turn_detection: turnDetection,
-      },
-    })
+      : { type: "server_vad" as const, threshold: 0.9, prefix_padding_ms: 300, silence_duration_ms: 1200, create_response: true }
+    sendEvent({ type: "session.update", session: { turn_detection: turnDetection } })
   }, [isPTTActive, sessionStatus, sendEvent])
 
+  // Handle mic status changes
   useEffect(() => {
     if (sessionStatus !== "CONNECTED") return
-    
-    // Check mic permission when trying to enable
     if (micStatus === "ENABLED") {
-      navigator.mediaDevices.getUserMedia({ audio: true })
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
         .then(() => {
           setMicStatus("ENABLED")
           mute(false)
@@ -526,186 +332,16 @@ function EditorWithRealtime() {
     }
   }, [micStatus, sessionStatus, mute, setMicStatus])
 
-  // const handleTalkButtonDown = useCallback(() => {
-  //   if (sessionStatus !== "CONNECTED" || !isPTTActive) return
+  // Run code handler
+  const handleRunCode = useCallback(() => {
+    runCode(code, language, starterCode)
+  }, [runCode, code, language, starterCode])
 
-  //   interrupt()
-  //   setIsPTTUserSpeaking(true)
-  //   sendEvent({ type: "input_audio_buffer.clear" })
-  // }, [interrupt, isPTTActive, sendEvent, sessionStatus])
+  // Hotkeys
+  useHotkeys("mod+enter", (e) => { e.preventDefault(); handleRunCode() }, { enableOnFormTags: true })
+  useHotkeys("mod+m", (e) => { e.preventDefault(); toggleMic() }, { enableOnFormTags: true })
 
-  // const handleTalkButtonUp = useCallback(() => {
-  //   if (
-  //     sessionStatus !== "CONNECTED" ||
-  //     !isPTTActive ||
-  //     !isPTTUserSpeaking
-  //   ) {
-  //     return
-  //   }
-
-  //   setIsPTTUserSpeaking(false)
-  //   sendEvent({ type: "input_audio_buffer.commit" })
-  //   sendEvent({ type: "response.create" })
-  // }, [isPTTActive, isPTTUserSpeaking, sendEvent, sessionStatus])
-
-  // const handlePTTToggle = useCallback(
-  //   (checked: boolean) => {
-  //     setIsPTTActive(checked)
-  //     if (!checked) {
-  //       setIsPTTUserSpeaking(false)
-  //     }
-  //   },
-  //   []
-  // )
-
-  // const selectedLanguageLabel = useMemo(
-  //   () => LANGUAGE_OPTIONS.find((option) => option.value === language)?.label,
-  //   [language]
-  // )
-
-  function toBase64(str: string): string {
-    const utf8Bytes = new TextEncoder().encode(str);
-    const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
-    return btoa(binaryString);
-  }
-
-  function fromBase64(base64: string): string {
-    const binaryString = atob(base64);
-    const bytes = Uint8Array.from(binaryString, char => char.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-  }
-
-  const toggleTestCase = (idx: number) => {
-    setExpandedTestCases(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(idx)) {
-        newSet.delete(idx);
-      } else {
-        newSet.add(idx);
-      }
-      return newSet;
-    });
-  };
-
-  const runCode = async () => {
-    const languageMeta = LANGUAGE_META[language];
-    setIsRunning(true);
-    setOutput("Submitting code...");
-
-    const finalSource = [starterCode?.imports, code, starterCode?.main]
-      .filter(Boolean)
-      .join("\n");
-
-    try {
-
-      // Calculate elapsed time from session start
-      const elapsedSeconds = sessionStartedAt 
-        ? Math.floor((Date.now() - new Date(sessionStartedAt).getTime()) / 1000)
-        : 0;
-
-      const submitRes = await fetch('/api/submission', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          judgeId: languageMeta.judgeId,
-          code: finalSource,
-          questionUri: params.name as string,
-          sessionId: sessionId,
-          timestamp: elapsedSeconds
-        })
-      });
-
-      if (!submitRes.ok) {
-        const errorText = await submitRes.text();
-        setOutput(`Submission failed: ${submitRes.status}\n${errorText}`);
-        return;
-      }
-
-      const { tokens, testCaseCount, questionId, code: submittedCode } = await submitRes.json();
-
-      if (!tokens || tokens.length === 0) {
-        setOutput("Error: No tokens received");
-        return;
-      }
-
-      const initialResults: TestCaseResult[] = Array.from({ length: testCaseCount }, () => ({ status: 'running' }));
-      setTestCaseResults(initialResults);
-      const maxAttempts = 10;
-      const pollInterval = 1500;
-
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
-
-        // Pass all required data for saving submission
-        const queryParams = new URLSearchParams({
-          tokens: tokens.join(','),
-          sessionId,
-          questionId,
-          code: submittedCode,
-          language,
-          timestamp: elapsedSeconds.toString()
-        });
-
-        const resultsRes = await fetch(`/api/submission?${queryParams}`);
-
-        if (!resultsRes.ok) {
-          setOutput(`Failed to fetch results: ${resultsRes.status}`);
-          return;
-        }
-
-        const data = await resultsRes.json();
-        const results: TestCaseResult[] = data.submissions.map((sub: any) => {
-          const isDone = sub.status.id > 2;
-          if (!isDone) return { status: 'running' as TestCaseStatus };
-          
-          const status: TestCaseStatus = sub.status?.id === 3 ? 'passed' : 'failed';
-          
-          // Truncate stderr to prevent massive error dumps from brute force test cases
-          const fullStderr = sub.stderr ? fromBase64(sub.stderr) : "";
-          const MAX_STDERR_LENGTH = 500;
-          const stderr = fullStderr.length > MAX_STDERR_LENGTH 
-            ? fullStderr.slice(0, MAX_STDERR_LENGTH) + "\n\n... (error message truncated)"
-            : fullStderr;
-          
-          return {
-            status,
-            actualOutput: sub.stdout ? fromBase64(sub.stdout) : "",
-            stderr
-          };
-        });
-
-        setTestCaseResults(results);
-        const allDone = data.submissions.every((sub: any) => sub.status.id > 2);
-
-        if (allDone) {
-          return;
-        }
-
-        if (attempt === maxAttempts - 1) {
-          setOutput("Timeout - Partial results");
-          return;
-        }
-      }
-      setOutput("Timeout: Results took too long");
-    } catch (error) {
-      console.error("runCode error:", error);
-      setOutput("Error running code. Please try again.");
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  useHotkeys('mod+enter', (event) => {
-    event.preventDefault();
-    runCode();
-  }, {enableOnFormTags: true})
-
-  useHotkeys('mod+m', (event) => {
-    event.preventDefault();
-    toggleMic();
-  }, {enableOnFormTags: true})
-
-  // Show loading while validating session
+  // Loading state
   if (!sessionValidated) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
@@ -716,49 +352,20 @@ function EditorWithRealtime() {
 
   return (
     <div className="h-screen w-full flex flex-col">
-      <AlertDialog open={showLeaveWarning} onOpenChange={setShowLeaveWarning}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div>
-                <p>If you leave now:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Your credits will be used</li>
-                  <li>The session will be marked as abandoned</li>
-                  <li>You will not be able to resume your progress</li>
-                  <li>No evaluation report will be generated</li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelLeave}>
-              Stay in Session
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmLeave}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Leave Session
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <TimeExpiredModal 
-        isOpen={isExpired && timerEnabled} 
-        onAutoSubmit={handleAutoSubmit} 
+      <LeaveWarningDialog
+        open={showLeaveWarning}
+        onOpenChange={setShowLeaveWarning}
+        onConfirm={handleConfirmLeave}
+        onCancel={handleCancelLeave}
       />
-      <CommandBar 
+      <TimeExpiredModal isOpen={isExpired && timerEnabled} onAutoSubmit={handleAutoSubmit} />
+      <CommandBar
         testResults={testCaseResults}
         sessionStartedAt={timerEnabled ? sessionStartedAt : null}
         durationMinutes={SESSION_DURATION_MINUTES}
         onTimeExpired={handleAutoSubmit}
       />
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="w-full h-screen rounded-lg border md:min-w-[450px]"
-      >
+      <ResizablePanelGroup direction="horizontal" className="w-full h-screen rounded-lg border md:min-w-[450px]">
         <ResizablePanel defaultSize={40}>
           <div className="flex h-full w-full items-center justify-center">
             <QuestionBar />
@@ -768,144 +375,25 @@ function EditorWithRealtime() {
         <ResizablePanel defaultSize={60}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={75}>
-              <div className="flex h-full w-full flex-col overflow-hidden">
-                <EditorCommandBar
-                  language={language}
-                  onLanguageChange={setLanguage}
-                  onRun={runCode}
-                  onSubmit={runCode}
-                />
-                {micStatus === "RESTRICTED" && (
-                  <Alert variant="destructive" className="border-0 rounded-none">
-                    <AlertCircle className=""/>
-                    <AlertTitle>Microphone Permission Denied</AlertTitle>
-                    <AlertDescription>
-                      Please enable microphone access in your browser settings to use voice features.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <div className="min-h-0 flex-1 border-t border-[#F0F0F0]">
-                  <Editor
-                    language={language === "cpp" ? "cpp" : language}
-                    value={code}
-                    onChange={(value) => setCode(value ?? "")}
-                    theme="vs"
-                    height="100%"
-                    options={{
-                      fontSize: 14,
-                      fontLigatures: true,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      smoothScrolling: true,
-                      wordWrap: "on",
-                      automaticLayout: true,
-                      padding: { top: 6 },
-                    }}
-                  />
-                </div>
-              </div>
+              <EditorPanel
+                code={code}
+                language={language}
+                micStatus={micStatus}
+                isRunning={isRunning}
+                onCodeChange={setCode}
+                onLanguageChange={setLanguage}
+                onRun={handleRunCode}
+                onSubmit={handleRunCode}
+              />
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel defaultSize={25}>
-              <div className="h-full w-full overflow-auto bg-background p-4">
-                {testCasesMetadata ? (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-sm mb-2">Test Cases</h3>
-                    {testCasesMetadata.visibleTestCases.map((tc, idx) => {
-                      const result = testCaseResults[idx];
-                      const isExpanded = expandedTestCases.has(idx);
-                      const isFailed = result?.status === 'failed';
-                      
-                      return (
-                        <div key={tc.id} className="border rounded-md p-3 space-y-2 text-sm">
-                          <div className="flex items-center justify-between">
-                            <div className="font-medium">Test Case {idx + 1}</div>
-                            {result && (
-                              <div 
-                                onClick={() => isFailed && toggleTestCase(idx)}
-                                className={isFailed ? "cursor-pointer" : ""}
-                              >
-                                <TestCaseBadge 
-                                  name="" 
-                                  status={result.status}
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Input: </span>
-                            <code className="bg-muted px-1 py-0.5 rounded text-xs">{tc.input}</code>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Expected: </span>
-                            <code className="bg-muted px-1 py-0.5 rounded text-xs">{tc.expected_output}</code>
-                          </div>
-                          {isFailed && isExpanded && result.actualOutput && (
-                            <div className="mt-2 pt-2 border-t space-y-2">
-                              <div>
-                                <span className="text-red-600 font-medium">Your Output: </span>
-                                <code className="bg-red-50 px-1 py-0.5 rounded text-xs">{result.actualOutput}</code>
-                              </div>
-                              {result.stderr && (
-                                <div>
-                                  <span className="text-red-600 font-medium">Error: </span>
-                                  <code className="bg-red-50 px-1 py-0.5 rounded text-xs">{result.stderr}</code>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {testCasesMetadata.hiddenTestCases?.map((tc, i) => {
-                        const hiddenIdx = testCasesMetadata.visibleTestCases.length + i;
-                        const result = testCaseResults[hiddenIdx];
-                        const isExpanded = expandedTestCases.has(hiddenIdx);
-                        const isFailed = result?.status === 'failed';
-                        
-                        return (
-                          <div key={tc.id} className="border rounded-md p-3 space-y-2 text-sm bg-muted/30">
-                            <div className="flex items-center justify-between">
-                              <div className="font-medium flex items-center gap-2">
-                                🔒 Hidden Test Case {hiddenIdx + 1}
-                              </div>
-                              {result && (
-                                <div 
-                                  onClick={() => isFailed && toggleTestCase(hiddenIdx)}
-                                  className={isFailed ? "cursor-pointer" : ""}
-                                >
-                                  <TestCaseBadge 
-                                    name="" 
-                                    status={result.status}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-muted-foreground text-xs">
-                              Test case details are hidden
-                            </div>
-                            {isFailed && isExpanded && result.actualOutput && (
-                              <div className="mt-2 pt-2 border-t space-y-2">
-                                <div>
-                                  <span className="text-red-600 font-medium">Your Output: </span>
-                                  <code className="bg-red-50 px-1 py-0.5 rounded text-xs">{result.actualOutput}</code>
-                                </div>
-                                {result.stderr && (
-                                  <div>
-                                    <span className="text-red-600 font-medium">Error: </span>
-                                    <code className="bg-red-50 px-1 py-0.5 rounded text-xs">{result.stderr}</code>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                  </div>
-                ) : (
-                  <pre className="font-mono text-sm whitespace-pre-wrap">{output}</pre>
-                )}
-              </div>
+              <TestCasesPanel
+                visibleTestCases={testCasesMetadata?.visibleTestCases || []}
+                hiddenTestCases={testCasesMetadata?.hiddenTestCases}
+                results={testCaseResults}
+                fallbackOutput={output}
+              />
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
@@ -923,4 +411,3 @@ export default function EditorPage() {
     </TranscriptProvider>
   )
 }
-

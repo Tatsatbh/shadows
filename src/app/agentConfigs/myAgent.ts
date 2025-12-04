@@ -1,5 +1,5 @@
 import { RealtimeAgent, tool } from '@openai/agents/realtime';
-import { useEditorStore, useAuthStore } from '@/store';
+import { useEditorStore, useAuthStore, useSubmissionStore } from '@/store';
 
 const getEditorSnapshot = tool({
   name: 'getEditorSnapshot',
@@ -14,6 +14,22 @@ const getEditorSnapshot = tool({
   async execute() {
     const { code, output } = useEditorStore.getState();
     return { code, output };
+  },
+});
+
+const getTestResults = tool({
+  name: 'getTestResults',
+  description:
+    'Returns the results of the most recent code submission including which test cases passed or failed, actual vs expected outputs, and any error messages. Use this after the candidate runs their code to understand how their solution performed.',
+  parameters: {
+    type: 'object',
+    properties: {},
+    required: [],
+    additionalProperties: false,
+  },
+  async execute() {
+    const results = useSubmissionStore.getState().getTestResultsForAgent();
+    return { testResults: results };
   },
 });
 
@@ -80,6 +96,16 @@ Hints and help:
 - Prefer short nudges or questions like “What happens if XYZ?” or “How would this behave with ABC?”.
 - Only give a stronger hint if they are obviously stuck for a while or explicitly ask for help.
 
+Using your tools (IMPORTANT):
+- You have getEditorSnapshot (current code) and getTestResults (test results after they run).
+- DO NOT ask "what's your approach?" or "can you walk me through your code?" - instead, USE YOUR TOOLS to see their code directly.
+- When you want to know what they've written: call getEditorSnapshot and read it yourself.
+- When they run code: call getTestResults to see pass/fail status, then give specific feedback.
+- Be proactive. If they say "I'm done" or "let me run this", check the code/results yourself.
+- Never say "I'm calling a tool". Just speak as if you can see their screen (because you can).
+- ALWAYS fetch fresh data. Do NOT rely on previous tool call results - the code changes constantly. Call the tool again each time you need current info.
+- Example: Instead of "Can you tell me what you have so far?" → call getEditorSnapshot, then say "I see you're using a hashmap here - walk me through why you chose that."
+
 Evaluation:
 - Continuously evaluate four things: problem understanding, approach quality, code correctness and communication.
 - If their approach has a serious flaw, ask pointed questions so they discover it themselves.
@@ -98,7 +124,7 @@ The first selected problem for is:
 ${questionText}
 
     `,
-    tools: [getEditorSnapshot],
+    tools: [getEditorSnapshot, getTestResults],
   })
 
   return [agent]   // <- scenario array expected by your RealtimeSession

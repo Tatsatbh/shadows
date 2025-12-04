@@ -9,9 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useQuery } from "@tanstack/react-query"
-import { fetchRecentSessions } from "@/lib/queries"
+import { fetchAllSessions } from "@/lib/queries"
 import { createClient } from "@/lib/supabase/client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 
 type Session = {
@@ -30,7 +30,7 @@ interface SessionsTableProps {
   limit?: number
 }
 
-export function SessionsTable({ limit = 10 }: SessionsTableProps) {
+export function SessionsTable({ limit }: SessionsTableProps) {
   const [userId, setUserId] = useState<string | null>(null)
   const router = useRouter()
 
@@ -45,11 +45,17 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
     getUserId()
   }, [])
 
-  const { data: sessions, isLoading } = useQuery({
-    queryKey: ["recentSessions", userId, limit],
-    queryFn: () => fetchRecentSessions(userId!, limit),
+  const { data: allSessions, isLoading } = useQuery({
+    queryKey: ["allSessions", userId],
+    queryFn: () => fetchAllSessions(userId!),
     enabled: !!userId,
   })
+
+  // Slice sessions based on limit prop
+  const sessions = useMemo(() => {
+    if (!allSessions) return []
+    return limit ? allSessions.slice(0, limit) : allSessions
+  }, [allSessions, limit])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -88,7 +94,7 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
   }
 
   if (!sessions || sessions.length === 0) {
-    return <div className="text-sm text-muted-foreground">No sessions yet. Start solving problems!</div>
+    return <div className="text-sm text-muted-foreground p-4">No sessions yet. Start solving problems!</div>
   }
 
   return (
@@ -104,7 +110,7 @@ export function SessionsTable({ limit = 10 }: SessionsTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sessions.map((session: any) => {
+          {sessions.map((session) => {
             const isAbandoned = session.status === 'abandoned'
             return (
               <TableRow 

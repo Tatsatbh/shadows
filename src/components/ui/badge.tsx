@@ -9,15 +9,14 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        // Inverted: light mode uses white bg, colored text + outline
         default:
-          "bg-white text-primary border-primary [a&]:hover:bg-primary/10 dark:bg-transparent dark:text-primary dark:border-primary",
+          "bg-primary text-primary-foreground border-transparent",
         secondary:
-          "bg-white text-green-600 border-green-600 [a&]:hover:bg-green-50 dark:bg-transparent dark:text-green-400 dark:border-green-400 dark:[a&]:hover:bg-green-400/10",
+          "bg-secondary text-secondary-foreground border-transparent",
         destructive:
-          "bg-white text-destructive border-destructive [a&]:hover:bg-destructive/10 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-transparent dark:text-destructive dark:border-destructive",
+          "bg-destructive text-destructive-foreground border-transparent",
         outline:
-          "bg-white text-foreground border-foreground [a&]:hover:bg-accent/30 [a&]:hover:text-foreground dark:bg-transparent dark:text-foreground dark:border-foreground",
+          "bg-transparent border-input",
       },
     },
     defaultVariants: {

@@ -11,7 +11,14 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes - data stays fresh, no refetch
+        gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache
+      },
+    },
+  }))
 
   return (
     <QueryClientProvider client={queryClient}>

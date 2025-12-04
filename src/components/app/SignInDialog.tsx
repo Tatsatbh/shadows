@@ -45,7 +45,7 @@ export function SignInDialog({ children }: SignInDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Sign in to RoundsRobin</DialogTitle>
+          <DialogTitle>Sign in to Shadows</DialogTitle>
           <DialogDescription>
             Choose your preferred sign-in method to continue
           </DialogDescription>

@@ -1,6 +1,6 @@
 # Environment Variables
 
-This document describes all environment variables required for RoundsRobin.
+This document describes all environment variables required for Shadows.
 
 ## Required Variables
 

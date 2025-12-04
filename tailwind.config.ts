@@ -59,13 +59,41 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			// Shadows.sh Design Tokens
+  			void: {
+  				page: '#09090b',      // Zinc 950 - Page background
+  				card: '#121214',      // Custom - Card surface
+  				elevated: '#18181b',  // Zinc 900 - Modals/dropdowns
+  			},
+  			edge: {
+  				subtle: '#27272a',    // Zinc 800 - Subtle borders
+  				active: '#3f3f46',    // Zinc 700 - Active borders
+  			},
+  			light: {
+  				primary: '#fafafa',   // Zinc 50 - Primary text
+  				muted: '#a1a1aa',     // Zinc 400 - Muted text
+  				brand: '#ffffff',     // Pure white - Brand accent
+  			},
+  			indicator: {
+  				danger: '#f43f5e',    // Rose 500 - Live/Danger
+  				success: '#10b981',   // Emerald 500 - Success/Terminal
+  				voice: '#6366f1',     // Indigo 500 - Voice/Active
+  			},
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+  		boxShadow: {
+  			'glow': '0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.5)',
+  			'glow-sm': '0 0 0 1px rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.4)',
+  			'glow-lg': '0 0 0 1px rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.6)',
+  			'glow-danger': '0 0 0 1px rgba(244, 63, 94, 0.3), 0 4px 12px rgba(244, 63, 94, 0.2)',
+  			'glow-success': '0 0 0 1px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(16, 185, 129, 0.2)',
+  			'glow-voice': '0 0 0 1px rgba(99, 102, 241, 0.3), 0 4px 12px rgba(99, 102, 241, 0.2)',
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate"), require('@tailwindcss/typography')],

@@ -110,7 +110,7 @@ export default function CommandBar({ testResults, sessionStartedAt, durationMinu
   }
 
   return (
-    <div className="w-full h-12 flex items-center justify-between px-4 bg-[#F0F0F0] text-foreground">
+    <div className="w-full h-12 flex items-center justify-between px-4 bg-void-elevated border-b border-edge-subtle">
       {sessionStartedAt ? (
         <SelfContainedTimer 
           startedAt={sessionStartedAt} 

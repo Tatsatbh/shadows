@@ -94,7 +94,7 @@ export const fetchTestCasesMetadata = async (questionUri: string) => {
   }
 }
 
-export const fetchRecentSessions = async (userId: string, limit: number = 10) => {
+export const fetchAllSessions = async (userId: string) => {
   const { data: sessions, error } = await supabase
     .from('sessions')
     .select(`
@@ -110,16 +110,9 @@ export const fetchRecentSessions = async (userId: string, limit: number = 10) =>
     `)
     .eq('user_id', userId)
     .order('started_at', { ascending: false })
-    .limit(limit)
   
   if (error) throw error
   
-  // Sort by status: completed first, then in_progress, then abandoned
-  const statusOrder = { completed: 0, in_progress: 1, abandoned: 2 }
-  return sessions?.sort((a, b) => {
-    const statusDiff = statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder]
-    if (statusDiff !== 0) return statusDiff
-    // If same status, sort by started_at descending
-    return new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
-  })
+  // Just return sorted by started_at (latest first) - already sorted by Supabase
+  return sessions
 }

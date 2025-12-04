@@ -35,13 +35,13 @@ export default function EditorCommandBar({
   return (
     <Menubar
       className={cn(
-        "h-9 w-full rounded-none border-none bg-white px-0 py-4 text-sm",
+        "h-9 w-full rounded-none border-none bg-void-elevated px-0 py-4 text-sm border-b border-edge-subtle",
         className
       )}
     >
       <div className="flex items-center gap-2 px-2">
         <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="h-7 w-40 rounded-sm bg-white py-0 text-xs shadow-none border-none text-[#007ACC] hover:bg-[#007ACC]/10 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 ring-0 ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:font-semibold">
+          <SelectTrigger className="h-7 w-40 rounded-sm bg-transparent py-0 text-xs shadow-none border-none text-light-primary hover:bg-white/5 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 ring-0 ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:font-semibold">
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
@@ -55,27 +55,17 @@ export default function EditorCommandBar({
           </SelectContent>
         </Select>
       </div>
-      <div className="ml-auto flex items-center gap-2">
-        <Button
-          size="icon"
-          type="button"
-          variant="ghost"
-          className="h-7 w-7 p-0 text-[#007ACC] bg-transparent hover:bg-[#007ACC]/10 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
-          aria-label="Run"
-          onClick={onRun}
-          disabled={isRunning}
-        >
-          <Play className="h-4 w-4" />
-        </Button>
+      <div className="ml-auto flex items-center gap-2 px-2">
         <Button
           size="sm"
           type="button"
           variant="ghost"
-          className="h-7 px-3 text-[#007ACC] text-xs bg-white hover:bg-[#007ACC]/10 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
-          onClick={onSubmit}
+          className="h-7 px-3 text-light-primary text-xs bg-transparent hover:bg-white/5 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50 flex items-center gap-1.5"
+          onClick={onRun}
           disabled={isRunning}
         >
-          {isRunning ? "Running..." : "Submit"}
+          <Play className="h-3.5 w-3.5" />
+          {isRunning ? "Running..." : "Run"}
         </Button>
       </div>
     </Menubar>

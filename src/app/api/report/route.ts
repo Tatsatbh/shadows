@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     // Build submission timeline with diffs for AI analysis
     const subs = submissions || [];
     const submissionTimeline = subs.map((sub, i) => {
-      const prevCode = i > 0 ? subs[i - 1].code : 
+      const prevCode = i > 0 ? subs[i - 1].code : null;
       const testsPassed = sub.result_json?.submissions?.filter((r: any) => r.status?.id === 3).length || 0;
       const totalTestsInSub = sub.result_json?.submissions?.length || 0;
       return {

@@ -1,0 +1,110 @@
+# Implementation Plan
+
+- [x] 1. Create useSessionManagement hook
+  - [x] 1.1 Create hook file with TypeScript interfaces
+    - Create `src/hooks/useSessionManagement.ts`
+    - Define `UseSessionManagementOptions` and `UseSessionManagementReturn` interfaces
+    - _Requirements: 1.1, 1.2, 1.3, 1.4_
+  - [x] 1.2 Implement session validation and creation logic
+    - Extract validation logic from EditorWithRealtime
+    - Handle token verification, session creation, and redirect on failure
+    - _Requirements: 1.1, 1.2_
+  - [x] 1.3 Implement navigation warning handlers
+    - Add beforeunload and popstate event listeners
+    - Implement handleConfirmLeave and handleCancelLeave
+    - _Requirements: 1.3, 1.4_
+  - [ ]* 1.4 Write property test for session validation
+    - **Property 1: Session validation handles all failure scenarios**
+    - **Validates: Requirements 1.1, 1.2**
+
+- [x] 2. Create useCodeSubmission hook
+  - [x] 2.1 Create hook file with TypeScript interfaces
+    - Create `src/hooks/useCodeSubmission.ts`
+    - Define `UseCodeSubmissionOptions`, `TestCaseResult`, and `UseCodeSubmissionReturn` interfaces
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+  - [x] 2.2 Implement code submission logic
+    - Extract runCode function from EditorWithRealtime
+    - Handle API calls to `/api/submission`
+    - _Requirements: 3.1_
+  - [x] 2.3 Implement polling and result handling
+    - Extract polling logic with timeout handling
+    - Handle base64 decoding and stderr truncation
+    - _Requirements: 3.2, 3.3_
+  - [ ]* 2.4 Write property test for polling completion
+    - **Property 3: Submission polling completes or times out**
+    - **Validates: Requirements 3.2, 3.3**
+  - [ ]* 2.5 Write property test for error handling
+    - **Property 4: Error responses produce error state**
+    - **Validates: Requirements 3.4**
+
+- [x] 3. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 4. Create LeaveWarningDialog component
+  - [x] 4.1 Create component file
+    - Create `src/components/app/LeaveWarningDialog.tsx`
+    - Define `LeaveWarningDialogProps` interface
+    - _Requirements: 5.1, 5.2, 5.3_
+  - [x] 4.2 Implement dialog UI
+    - Extract AlertDialog markup from EditorWithRealtime
+    - Wire up onConfirm and onCancel callbacks
+    - _Requirements: 5.1, 5.2, 5.3_
+
+- [x] 5. Create TestCasesPanel component
+  - [x] 5.1 Create component file with TypeScript interfaces
+    - Create `src/components/app/TestCasesPanel.tsx`
+    - Define `TestCasesPanelProps` and `TestCaseMetadata` interfaces
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [x] 5.2 Implement test cases rendering
+    - Extract visible and hidden test case rendering from EditorWithRealtime
+    - Implement expandable failure details
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [x] 5.3 Implement fallback output display
+    - Show raw output when no test case metadata exists
+    - _Requirements: 4.4_
+  - [ ]* 5.4 Write property test for test case count
+    - **Property 5: Test cases panel renders correct count**
+    - **Validates: Requirements 4.1**
+  - [ ]* 5.5 Write property test for running indicator
+    - **Property 6: Running test cases display running indicator**
+    - **Validates: Requirements 4.3**
+
+- [x] 6. Create EditorPanel component
+  - [x] 6.1 Create component file with TypeScript interfaces
+    - Create `src/components/app/EditorPanel.tsx`
+    - Define `EditorPanelProps` interface
+    - _Requirements: 6.1, 6.2, 6.3_
+  - [x] 6.2 Implement editor with command bar
+    - Extract Monaco Editor and EditorCommandBar from EditorWithRealtime
+    - Wire up language change and run/submit callbacks
+    - _Requirements: 6.1, 6.2_
+  - [x] 6.3 Implement microphone alert
+    - Show alert when micStatus is RESTRICTED
+    - _Requirements: 6.3_
+  - [ ]* 6.4 Write property test for code change callback
+    - **Property 7: Code changes invoke callback**
+    - **Validates: Requirements 6.2**
+
+- [x] 7. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 8. Refactor EditorWithRealtime to use new hooks and components
+  - [x] 8.1 Integrate useSessionManagement hook
+    - Replace inline session validation with hook
+    - Wire up leave warning state and handlers
+    - _Requirements: 1.1, 1.2, 1.3, 1.4_
+  - [x] 8.2 Integrate useCodeSubmission hook
+    - Replace inline runCode with hook
+    - Wire up test case results and running state
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+  - [x] 8.3 Replace inline UI with extracted components
+    - Use LeaveWarningDialog, TestCasesPanel, EditorPanel
+    - Pass appropriate props to each component
+    - _Requirements: 4.1, 5.1, 6.1, 7.1, 7.2, 7.3_
+  - [x] 8.4 Clean up unused imports and code
+    - Remove extracted code from EditorWithRealtime
+    - Verify component is under 200 lines
+    - _Requirements: 7.1_
+
+- [ ] 9. Final Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

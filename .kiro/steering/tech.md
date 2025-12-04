@@ -1,6 +1,6 @@
 # tech.md
 
-**Project**: RoundsRobin (working name)
+**Project**: Shadows (working name)
 
 **Assets**: [design screenshot](/mnt/data/Screenshot 2025-11-14 at 8.03.15 PM.png)
 

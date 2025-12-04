@@ -26,7 +26,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-black rounded"></div>
-            <span className="font-semibold text-base">RoundsRobin</span>
+            <span className="font-semibold text-base">Shadows</span>
           </div>
           <nav className="flex items-center gap-8">
             <Link href="#features" className="text-sm text-neutral-600 hover:text-black transition-colors">

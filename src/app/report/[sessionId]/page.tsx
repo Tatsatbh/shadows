@@ -23,6 +23,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable"
 
 interface Submission {
   id: string
@@ -57,7 +62,6 @@ interface TranscriptMessage {
   timestamp?: string
 }
 
-
 interface SessionData {
   id: string
   status: string
@@ -75,7 +79,7 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
   const changes = useMemo(() => diffLines(oldCode, newCode), [oldCode, newCode])
   
   return (
-    <pre className="text-xs font-mono bg-zinc-100 p-3 rounded overflow-x-auto">
+    <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto border border-border">
       {changes.map((change: Change, i: number) => {
         const lines = change.value.split('\n').filter((_, idx, arr) => 
           idx < arr.length - 1 || arr[idx] !== ''
@@ -85,10 +89,10 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
             key={`${i}-${j}`}
             className={
               change.added
-                ? "bg-green-100 text-green-700"
+                ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
                 : change.removed
-                ? "bg-red-100 text-red-700"
-                : "text-zinc-600"
+                ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                : "text-muted-foreground"
             }
           >
             <span className="select-none opacity-50 mr-2">
@@ -119,34 +123,33 @@ function DimensionScore({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="w-full">
-        <div className="flex items-center gap-3 py-2 hover:bg-zinc-100 rounded-lg px-2 -mx-2 transition-colors cursor-pointer">
+        <div className="flex items-center gap-3 py-2 hover:bg-accent rounded-lg px-2 -mx-2 transition-colors cursor-pointer">
           <ChevronRight 
             size={16} 
-            className={`text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} 
+            className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} 
           />
-          <span className="text-sm text-zinc-700 w-32 text-left">{label}</span>
-          <div className="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+          <span className="text-sm text-foreground w-32 text-left">{label}</span>
+          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
             <div className={`h-full ${color} transition-all`} style={{ width: `${(score / 5) * 100}%` }} />
           </div>
-          <span className="text-sm text-zinc-500 w-10 text-right">{score}/5</span>
+          <span className="text-sm text-muted-foreground w-10 text-right">{score}/5</span>
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
-        <div className="ml-6 mt-2 p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-3">
+        <div className="mt-2 p-4 bg-muted rounded-lg border border-border space-y-3">
           <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Evidence</p>
-            <p className="text-sm text-zinc-700 leading-relaxed">{evidence}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Evidence</p>
+            <p className="text-sm text-foreground leading-relaxed">{evidence}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Reasoning</p>
-            <p className="text-sm text-zinc-700 leading-relaxed">{reasoning}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Reasoning</p>
+            <p className="text-sm text-foreground leading-relaxed">{reasoning}</p>
           </div>
         </div>
       </CollapsibleContent>
     </Collapsible>
   )
 }
-
 
 function parseTranscript(transcriptString: string): TranscriptMessage[] {
   if (!transcriptString) return []
@@ -192,17 +195,17 @@ function AIAssessmentPanel({ scorecard }: { scorecard: Scorecard }) {
   ]
 
   return (
-    <Card className="bg-white border-zinc-200 shadow-sm">
+    <Card className="bg-card border-border shadow-sm">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg text-zinc-900">AI Assessment</CardTitle>
+          <CardTitle className="text-lg">AI Assessment</CardTitle>
           <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${recColor}`}>
             {scorecard.overallRecommendation}
           </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <p className="text-sm text-zinc-600 leading-relaxed">{scorecard.summary}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">{scorecard.summary}</p>
         
         <div className="space-y-1">
           {dimensions.map(({ key, label, data }) => (
@@ -220,7 +223,6 @@ function AIAssessmentPanel({ scorecard }: { scorecard: Scorecard }) {
   )
 }
 
-
 function TranscriptCard({ transcript }: { transcript: string }) {
   const messages = parseTranscript(transcript)
   const messageCount = messages.length
@@ -228,32 +230,32 @@ function TranscriptCard({ transcript }: { transcript: string }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Card className="bg-white border-zinc-200 shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer group">
+        <Card className="bg-card border-border shadow-sm hover:bg-accent transition-colors cursor-pointer group">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
+                <div className="p-3 rounded-xl bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors dark:bg-blue-500/20 dark:text-blue-400 dark:group-hover:bg-blue-500/30">
                   <MessageSquare size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-zinc-900">Interview Transcript</h3>
-                  <p className="text-sm text-zinc-500">
+                  <h3 className="font-semibold text-foreground">Interview Transcript</h3>
+                  <p className="text-sm text-muted-foreground">
                     {messageCount > 0 ? `${messageCount} messages` : 'No messages'}
                   </p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+              <ChevronRight size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
             </div>
           </CardContent>
         </Card>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-lg bg-white border-zinc-200 p-0 flex flex-col">
-        <SheetHeader className="p-4 border-b border-zinc-200">
-          <SheetTitle className="text-zinc-900">Interview Transcript</SheetTitle>
+      <SheetContent side="right" className="w-full sm:max-w-lg bg-background border-border p-0 flex flex-col">
+        <SheetHeader className="p-4 border-b border-border bg-card">
+          <SheetTitle className="text-foreground">Interview Transcript</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto p-4 bg-zinc-50">
+        <div className="flex-1 overflow-y-auto p-4 bg-background">
           {messages.length === 0 ? (
-            <p className="text-zinc-500 text-center py-12">No transcript available</p>
+            <p className="text-muted-foreground text-center py-12">No transcript available</p>
           ) : (
             <div className="space-y-3">
               {messages.map((msg, i) => (
@@ -264,19 +266,19 @@ function TranscriptCard({ transcript }: { transcript: string }) {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
                       msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-md'
-                        : 'bg-white text-zinc-900 border border-zinc-200 rounded-bl-md shadow-sm'
+                        ? 'bg-blue-600 text-white rounded-br-md dark:bg-blue-500'
+                        : 'bg-card text-foreground border border-border rounded-bl-md shadow-sm'
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className={`text-xs font-medium ${
-                        msg.role === 'user' ? 'text-blue-200' : 'text-zinc-500'
+                        msg.role === 'user' ? 'text-blue-200 dark:text-blue-100' : 'text-muted-foreground'
                       }`}>
                         {msg.role === 'user' ? 'Candidate' : 'AI Interviewer'}
                       </span>
                       {msg.timestamp && (
                         <span className={`text-xs ${
-                          msg.role === 'user' ? 'text-blue-300' : 'text-zinc-400'
+                          msg.role === 'user' ? 'text-blue-300 dark:text-blue-200' : 'text-muted-foreground'
                         }`}>
                           {msg.timestamp}
                         </span>
@@ -307,7 +309,6 @@ function TestResultBadge({ results }: { results: Submission['result_json']['subm
   )
 }
 
-
 function SubmissionCard({ 
   submission, 
   index, 
@@ -322,43 +323,43 @@ function SubmissionCard({
   const [expanded, setExpanded] = useState(index === 0)
   
   const time = submission.timestamp !== null
-    ? `${Math.floor(submission.timestamp / 60)}:${String(submission.timestamp % 60).padStart(2, '0')}`
+    ? `T+${String(Math.floor(submission.timestamp / 60)).padStart(2, '0')}:${String(submission.timestamp % 60).padStart(2, '0')}`
     : new Date(submission.created_at).toLocaleTimeString()
   
   return (
-    <Card className="bg-white border-zinc-200 shadow-sm overflow-hidden">
+    <Card className="bg-card border-border shadow-sm overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-accent transition-colors"
       >
         <div className="flex items-center gap-3">
           <ChevronRight 
             size={16} 
-            className={`text-zinc-400 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+            className={`text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
           />
-          <span className="font-medium text-zinc-900">Submission #{index + 1}</span>
-          <span className="text-zinc-500 text-sm">{time}</span>
+          <span className="font-medium text-foreground">Submission #{index + 1}</span>
+          <span className="text-muted-foreground text-sm">{time}</span>
         </div>
         <TestResultBadge results={submission.result_json.submissions} />
       </button>
       
       {expanded && (
-        <CardContent className="pt-3 border-t border-zinc-200">
+        <CardContent className="pt-3 border-t border-border">
           {aiComment && (
-            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-              <span className="text-blue-600 font-medium">AI: </span>{aiComment}
+            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 dark:bg-blue-500/20 dark:border-blue-500/50 dark:text-blue-400">
+              <span className="font-medium">AI: </span>{aiComment}
             </div>
           )}
           
           {prevCode ? (
             <>
-              <p className="text-xs text-zinc-500 mb-2">Changes from previous submission:</p>
+              <p className="text-xs text-muted-foreground mb-2">Changes from previous submission:</p>
               <DiffView oldCode={prevCode} newCode={submission.code} />
             </>
           ) : (
             <>
-              <p className="text-xs text-zinc-500 mb-2">Initial submission:</p>
-              <pre className="text-xs font-mono bg-zinc-100 p-3 rounded overflow-x-auto text-zinc-700">
+              <p className="text-xs text-muted-foreground mb-2">Initial submission:</p>
+              <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto text-foreground border border-border">
                 {submission.code}
               </pre>
             </>
@@ -368,10 +369,10 @@ function SubmissionCard({
             {submission.result_json.submissions.map((result, i) => (
               <div 
                 key={i}
-                className={`text-xs p-2 rounded ${
+                className={`text-xs p-2 rounded border ${
                   result.status.id === 3 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-700'
+                    ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/50' 
+                    : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/50'
                 }`}
               >
                 Test {i + 1}: {result.status.description}
@@ -383,7 +384,6 @@ function SubmissionCard({
     </Card>
   )
 }
-
 
 export default function ReportPage() {
   const params = useParams()
@@ -428,16 +428,16 @@ export default function ReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <p className="text-zinc-500">Loading report...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Loading report...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-destructive">Error: {error}</p>
       </div>
     )
   }
@@ -451,66 +451,116 @@ export default function ReportPage() {
   )
 
   return (
-    <div className="min-h-screen p-6 bg-zinc-50">
+    <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto">
         {/* Header - Full Width */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-zinc-900">Session Report</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Session Report</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             {submissions.length} submissions • {totalPassed}/{totalTests} total test runs passed
           </p>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Column - AI Assessment (sticky) */}
-          <div className="lg:w-2/5">
-            <div className="lg:sticky lg:top-6">
+        {/* Desktop Layout with Resizable Panels */}
+        <ResizablePanelGroup direction="horizontal" className="hidden lg:flex min-h-[calc(100vh-12rem)]">
+          {/* Left Panel - AI Assessment */}
+          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
+            <div className="pr-4 h-full overflow-auto">
               {scorecard ? (
                 <AIAssessmentPanel scorecard={scorecard} />
               ) : (
-                <Card className="bg-white border-zinc-200 shadow-sm">
-                  <CardContent className="p-6 text-center text-zinc-500">
+                <Card className="bg-card border-border shadow-sm">
+                  <CardContent className="p-6 text-center text-muted-foreground">
                     No AI assessment available
                   </CardContent>
                 </Card>
               )}
             </div>
-          </div>
+          </ResizablePanel>
 
-          {/* Right Column - Interview Content */}
-          <div className="lg:w-3/5 space-y-6">
-            {sessionData?.transcript?.items && (
-              <TranscriptCard transcript={sessionData.transcript.items} />
-            )}
+          {/* Resizable Handle */}
+          <ResizableHandle withHandle className="bg-border" />
 
-            <div>
-              <h2 className="text-lg font-semibold mb-4 text-zinc-900">Submission Timeline</h2>
-              <div className="space-y-3">
-                {submissions.map((submission, i) => {
-                  const comment = scorecard?.submissionComments?.find(
-                    (c) => c.submissionNumber === i + 1
-                  )?.comment
-                  return (
-                    <SubmissionCard
-                      key={submission.id}
-                      submission={submission}
-                      index={i}
-                      prevCode={i > 0 ? submissions[i - 1].code : null}
-                      aiComment={comment}
-                    />
-                  )
-                })}
-              </div>
-
-              {submissions.length === 0 && (
-                <Card className="bg-white border-zinc-200 shadow-sm">
-                  <CardContent className="p-6 text-center text-zinc-500">
-                    No submissions found for this session.
-                  </CardContent>
-                </Card>
+          {/* Right Panel - Interview Content */}
+          <ResizablePanel defaultSize={60} minSize={40}>
+            <div className="pl-4 h-full overflow-auto space-y-6">
+              {sessionData?.transcript?.items && (
+                <TranscriptCard transcript={sessionData.transcript.items} />
               )}
+
+              <div>
+                <h2 className="text-lg font-semibold mb-4 text-foreground">Submission Timeline</h2>
+                <div className="space-y-3">
+                  {submissions.map((submission, i) => {
+                    const comment = scorecard?.submissionComments?.find(
+                      (c) => c.submissionNumber === i + 1
+                    )?.comment
+                    return (
+                      <SubmissionCard
+                        key={submission.id}
+                        submission={submission}
+                        index={i}
+                        prevCode={i > 0 ? submissions[i - 1].code : null}
+                        aiComment={comment}
+                      />
+                    )
+                  })}
+                </div>
+
+                {submissions.length === 0 && (
+                  <Card className="bg-card border-border shadow-sm">
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                      No submissions found for this session.
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden space-y-6">
+          {scorecard ? (
+            <AIAssessmentPanel scorecard={scorecard} />
+          ) : (
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-6 text-center text-muted-foreground">
+                No AI assessment available
+              </CardContent>
+            </Card>
+          )}
+
+          {sessionData?.transcript?.items && (
+            <TranscriptCard transcript={sessionData.transcript.items} />
+          )}
+
+          <div>
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Submission Timeline</h2>
+            <div className="space-y-3">
+              {submissions.map((submission, i) => {
+                const comment = scorecard?.submissionComments?.find(
+                  (c) => c.submissionNumber === i + 1
+                )?.comment
+                return (
+                  <SubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                    index={i}
+                    prevCode={i > 0 ? submissions[i - 1].code : null}
+                    aiComment={comment}
+                  />
+                )
+              })}
+            </div>
+
+            {submissions.length === 0 && (
+              <Card className="bg-card border-border shadow-sm">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  No submissions found for this session.
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

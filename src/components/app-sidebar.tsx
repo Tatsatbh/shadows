@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Command,
   FileText,
@@ -21,27 +22,28 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/store"
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: Home,
-      isActive: true,
-      items: [],
-    },
-    {
-      title: "Reports",
-      url: "#",
-      icon: FileText,
-      isActive: false,
-      items: [],
-    },
-  ],
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAuthStore((state) => state.user)
+  const pathname = usePathname()
+
+  const data = {
+    navMain: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
+        isActive: pathname === "/dashboard",
+        items: [],
+      },
+      {
+        title: "Reports",
+        url: "/reports",
+        icon: FileText,
+        isActive: pathname === "/reports",
+        items: [],
+      },
+    ],
+  }
 
   const userData = {
     name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
@@ -60,8 +62,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Shadows</span>
                 </div>
               </Link>
             </SidebarMenuButton>
