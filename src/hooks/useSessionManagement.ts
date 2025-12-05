@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
 export interface UseSessionManagementOptions {
@@ -15,6 +15,7 @@ export interface UseSessionManagementReturn {
   setShowLeaveWarning: (show: boolean) => void
   handleConfirmLeave: () => Promise<void>
   handleCancelLeave: () => void
+  disableLeaveWarning: () => void
 }
 
 export function useSessionManagement({
@@ -24,6 +25,7 @@ export function useSessionManagement({
   const [sessionValidated, setSessionValidated] = useState(false)
   const [sessionStartedAt, setSessionStartedAt] = useState<string | null>(null)
   const [showLeaveWarning, setShowLeaveWarning] = useState(false)
+  const leaveWarningEnabledRef = useRef(true)
   const router = useRouter()
 
   // Validate and create session on mount
@@ -100,12 +102,19 @@ export function useSessionManagement({
     validateAndCreateSession()
   }, [sessionId, questionUri, router])
 
-  // Warn user before leaving page during active session
+  // Warn user before leaving page during active session and mark as abandoned if they leave
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Check ref synchronously - if disabled (intentional hang up), don't show warning or mark abandoned
+      if (!leaveWarningEnabledRef.current) return
+      
+      // Mark session as abandoned using sendBeacon (works even when page is closing)
+      navigator.sendBeacon(
+        "/api/session-abandon",
+        JSON.stringify({ sessionId })
+      )
+      
       e.preventDefault()
-      e.returnValue = "Are you sure you want to leave? Your session will be marked as abandoned."
-      return "Are you sure you want to leave? Your session will be marked as abandoned."
     }
 
     window.addEventListener("beforeunload", handleBeforeUnload)
@@ -113,6 +122,10 @@ export function useSessionManagement({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload)
     }
+  }, [sessionId])
+
+  const disableLeaveWarning = useCallback(() => {
+    leaveWarningEnabledRef.current = false
   }, [])
 
   // Handle browser back button
@@ -164,5 +177,6 @@ export function useSessionManagement({
     setShowLeaveWarning,
     handleConfirmLeave,
     handleCancelLeave,
+    disableLeaveWarning,
   }
 }

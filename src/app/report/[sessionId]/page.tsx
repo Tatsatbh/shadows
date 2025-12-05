@@ -23,11 +23,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable"
+
 
 interface Submission {
   id: string
@@ -207,7 +203,7 @@ function AIAssessmentPanel({ scorecard }: { scorecard: Scorecard }) {
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground leading-relaxed">{scorecard.summary}</p>
         
-        <div className="space-y-1">
+        <div className="space-y-3">
           {dimensions.map(({ key, label, data }) => (
             <DimensionScore
               key={key}
@@ -453,7 +449,6 @@ export default function ReportPage() {
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto">
-        {/* Header - Full Width */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Session Report</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -461,11 +456,9 @@ export default function ReportPage() {
           </p>
         </div>
 
-        {/* Desktop Layout with Resizable Panels */}
-        <ResizablePanelGroup direction="horizontal" className="hidden lg:flex min-h-[calc(100vh-12rem)]">
-          {/* Left Panel - AI Assessment */}
-          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
-            <div className="pr-4 h-full overflow-auto">
+        <div className="hidden lg:flex gap-6">
+          <div className="w-[32%] shrink-0">
+            <div className="sticky top-6 space-y-6">
               {scorecard ? (
                 <AIAssessmentPanel scorecard={scorecard} />
               ) : (
@@ -475,21 +468,15 @@ export default function ReportPage() {
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </ResizablePanel>
-
-          {/* Resizable Handle */}
-          <ResizableHandle withHandle className="bg-border" />
-
-          {/* Right Panel - Interview Content */}
-          <ResizablePanel defaultSize={60} minSize={40}>
-            <div className="pl-4 h-full overflow-auto space-y-6">
+              
               {sessionData?.transcript?.items && (
                 <TranscriptCard transcript={sessionData.transcript.items} />
               )}
+            </div>
+          </div>
 
-              <div>
-                <h2 className="text-lg font-semibold mb-4 text-foreground">Submission Timeline</h2>
+          <div className="flex-1">
+            <div>
                 <div className="space-y-3">
                   {submissions.map((submission, i) => {
                     const comment = scorecard?.submissionComments?.find(
@@ -514,12 +501,10 @@ export default function ReportPage() {
                     </CardContent>
                   </Card>
                 )}
-              </div>
             </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+        </div>
 
-        {/* Mobile Layout */}
         <div className="lg:hidden space-y-6">
           {scorecard ? (
             <AIAssessmentPanel scorecard={scorecard} />

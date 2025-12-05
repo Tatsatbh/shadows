@@ -36,7 +36,7 @@ export function InfiniteCarousel({ items, speed = 25, sizeMultipliers = {}, padd
           return (
             <div
               key={idx}
-              className="flex-shrink-0 flex items-center justify-center grayscale opacity-50"
+              className="flex-shrink-0 flex items-center justify-center opacity-70"
               style={{
                 transform: `scale(${sizeMultiplier})`,
                 padding
@@ -47,7 +47,7 @@ export function InfiniteCarousel({ items, speed = 25, sizeMultipliers = {}, padd
                 alt={item.alt}
                 width={140}
                 height={48}
-                className="h-12 w-auto object-contain"
+                className="h-12 w-auto object-contain brightness-0 invert"
                 priority={idx < items.length}
               />
             </div>
@@ -56,8 +56,8 @@ export function InfiniteCarousel({ items, speed = 25, sizeMultipliers = {}, padd
       </div>
       
       {/* Gradient overlays */}
-      <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
+      <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-void-page to-transparent pointer-events-none z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-void-page to-transparent pointer-events-none z-10" />
       
       <style jsx>{`
         @keyframes scroll {

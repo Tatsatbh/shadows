@@ -14,16 +14,22 @@ import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 
-type Session = {
+type QuestionInfo = {
+  question_number: number
+  title: string
+  difficulty: "Easy" | "Medium" | "Hard"
+}
+
+type SessionFromDB = {
   id: string
   status: "in_progress" | "completed" | "abandoned"
   started_at: string
   ended_at: string | null
-  questions: {
-    question_number: number
-    title: string
-    difficulty: "Easy" | "Medium" | "Hard"
-  } | null
+  questions: QuestionInfo | QuestionInfo[] | null
+}
+
+type Session = Omit<SessionFromDB, 'questions'> & {
+  questions: QuestionInfo | null
 }
 
 interface SessionsTableProps {
@@ -51,10 +57,16 @@ export function SessionsTable({ limit }: SessionsTableProps) {
     enabled: !!userId,
   })
 
-  // Slice sessions based on limit prop
-  const sessions = useMemo(() => {
+  // Normalize and slice sessions based on limit prop
+  const sessions: Session[] = useMemo(() => {
     if (!allSessions) return []
-    return limit ? allSessions.slice(0, limit) : allSessions
+    const normalized = allSessions.map((session): Session => ({
+      ...session,
+      questions: Array.isArray(session.questions) 
+        ? session.questions[0] ?? null 
+        : session.questions
+    }))
+    return limit ? normalized.slice(0, limit) : normalized
   }, [allSessions, limit])
 
   const formatDate = (dateString: string) => {

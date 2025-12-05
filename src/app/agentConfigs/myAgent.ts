@@ -33,29 +33,10 @@ const getTestResults = tool({
   },
 });
 
-
-// const getQuestion = tool({
-//   name: 'getQuestion',
-//   description:
-//   'Returns the question the interviewee is solving and currently visible on the screen and everything related to it',
-//   parameters: {
-//     type: 'object',
-//     properties: {},
-//     required: [],
-//     additionalProperties: false,
-//   },
-//   async execute() {
-//     const { questionText } = useQuestionStore.getState();
-//     return {questionText} 
-//   }
-// })
-
-
 export function createInterviewerScenario(questionText: string) {
-  console.log(questionText)
-  
   const user = useAuthStore.getState().user
-  const candidateName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'candidate'
+  const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'candidate'
+  const candidateName = fullName.split(' ')[0]
   
   const agent = new RealtimeAgent({
     name: 'interviewer',
@@ -75,7 +56,7 @@ Interview style:
 - Keep the tone friendly but serious. This is a real interview, not a lesson.
 
 Structure of the interview:
-1. Greet the candidate briefly using their name (${candidateName}), and explain the format in one or two sentences.
+1. Start with a warm greeting: "Hey ${candidateName}, I'm your interviewer today. How are you doing?" Wait for their response and engage briefly with what they say (30 seconds max). Then explain the format in one or two sentences.
 2. Introduce the main coding problem and any constraints.
 3. Ask what clarifying questions they have about the problem. Answer them briefly.
 4. Ask them to think out loud so you can follow their reasoning.
@@ -90,11 +71,14 @@ Structure of the interview:
    - Time and space complexity.
    - Possible improvements.
 
-Hints and help:
-- Do not spoon feed solutions.
-- Do not act like a teacher.
-- Prefer short nudges or questions like “What happens if XYZ?” or “How would this behave with ABC?”.
-- Only give a stronger hint if they are obviously stuck for a while or explicitly ask for help.
+Hints and help (CRITICAL - READ CAREFULLY):
+- YOU ARE AN INTERVIEWER, NOT A TEACHER. DO NOT GIVE HINTS UNLESS EXPLICITLY ASKED OR THE CANDIDATE IS CLEARLY STUCK FOR AN EXTENDED PERIOD (2+ minutes of silence or repeated failed attempts).
+- Do NOT volunteer suggestions, optimizations, or guidance unprompted.
+- Do NOT say things like "have you considered..." or "what about..." unless they explicitly ask for help.
+- If they ask a clarifying question about the problem statement, answer it. But do NOT guide their approach.
+- If they are stuck and ask for help, give minimal nudges like "What happens if XYZ?" - never give away the solution.
+- Let them struggle. Let them make mistakes. That's how real interviews work.
+- Your job is to OBSERVE and EVALUATE, not to TEACH.
 
 Using your tools (IMPORTANT):
 - You have getEditorSnapshot (current code) and getTestResults (test results after they run).
@@ -127,9 +111,7 @@ ${questionText}
     tools: [getEditorSnapshot, getTestResults],
   })
 
-  return [agent]   // <- scenario array expected by your RealtimeSession
+  return [agent]
 }
 
-// export const interviewerScenario = [interviewerAgent];
 export const interviewerCompanyName = 'Aceinit.dev'
-// export default interviewerScenario

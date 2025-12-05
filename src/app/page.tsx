@@ -19,39 +19,43 @@ const jetbrainsMono = localFont({
   variable: '--font-jetbrains-mono',
 })
 
+const minecraft = localFont({
+  src: '../../public/fonts/minecraft.otf',
+  variable: '--font-minecraft',
+})
+
 export default function LandingPage() {
   return (
-    <div className={`min-h-screen bg-white text-black ${poppins.className}`}>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-black/10">
+    <div className={`min-h-screen bg-void-page text-light-primary ${poppins.className}`}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-void-page/80 backdrop-blur-sm border-b border-edge-subtle">
         <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-black rounded"></div>
-            <span className="font-semibold text-base">Shadows</span>
+            <span className={`${minecraft.className} text-2xl text-white`}>shadows.sh</span>
           </div>
           <nav className="flex items-center gap-8">
-            <Link href="#features" className="text-sm text-neutral-600 hover:text-black transition-colors">
+            <Link href="#features" className="text-sm text-light-muted hover:text-light-primary transition-colors">
               Features
             </Link>
-            <Link href="#pricing" className="text-sm text-neutral-600 hover:text-black transition-colors">
+            <Link href="#pricing" className="text-sm text-light-muted hover:text-light-primary transition-colors">
               Pricing
             </Link>
             <SignInDialog>
-              <Button variant="ghost" size="sm" className="text-sm text-neutral-600 hover:text-black hover:bg-transparent">
+              <Button variant="ghost" size="sm" className="text-sm text-light-muted hover:text-light-primary hover:bg-transparent">
                 Login
               </Button>
             </SignInDialog>
             <SignInDialog>
-              <Button size="sm" className="bg-black text-white hover:bg-neutral-800 rounded-md h-8 px-4 text-sm font-medium">
+              <Button size="sm" className="bg-white text-black hover:bg-white/90 rounded-md h-8 px-4 text-sm font-medium">
                 Signup
               </Button>
             </SignInDialog>
           </nav>
         </div>
       </header>
-      <section className="pt-32 pb-20 px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-32 pb-20">
+        <div className="max-w-7xl mx-auto px-8">
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl leading-[1.3] font-bold tracking-tight mb-6">
+            <h1 className="text-3xl md:text-5xl leading-[1.3] font-bold tracking-tight mb-6 text-light-primary">
               Live AI coding mock interviews
               <br />
               <span className="flex items-center gap-3 flex-wrap">
@@ -63,12 +67,14 @@ export default function LandingPage() {
                 />
               </span>
             </h1>
-            <p className="text-lg text-neutral-600 mb-8 max-w-2xl leading-relaxed">
-              Stop paying for overpriced mocks. Train for real interviews with AI that scores your coding, analyzes your communication, and shows you how to improve immediately.
+            <p className="text-lg text-light-muted mb-8 max-w-2xl leading-relaxed">
+              Don't practice in a vacuum. Shadowbox with a Senior Engineer.
+
+The first AI Interviewer that runs your code, judges your voice, and catches your edge cases in real-time. Stop guessing if you're ready. Prove it.
             </p>
             <div className="flex items-center gap-4">
               <SignInDialog>
-                <Button size="lg" className="bg-black text-white hover:bg-neutral-800 rounded-md h-11 px-6 text-sm font-medium">
+                <Button size="lg" className="bg-white text-black hover:bg-white/90 rounded-md h-11 px-6 text-sm font-medium">
                   Get Started
                 </Button>
               </SignInDialog>
@@ -76,13 +82,13 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      <section className="px-8 pb-20">
-        <div className="max-w-7xl mx-auto">
+      <section className="pb-20">
+        <div className="max-w-7xl mx-auto px-8">
           <div
             className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden"
             style={{
-              maskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)'
+              maskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 100%)'
             }}
           >
             <HeroPreview />
@@ -91,7 +97,7 @@ export default function LandingPage() {
       </section>
       <section className="pb-32">
         <div className="max-w-7xl mx-auto px-8">
-          <p className="text-center text-sm text-neutral-500 mb-8 font-medium tracking-wide uppercase">
+          <p className="text-center text-sm text-light-muted mb-8 font-medium tracking-wide uppercase">
             Used by Students AND Engineers from top institutions
           </p>
           <InfiniteCarousel

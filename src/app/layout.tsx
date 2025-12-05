@@ -4,8 +4,22 @@ import "./lib/envSetup";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "r0",
-  description: "r0 is a demo app from OpenAI.",
+  title: "Shadows",
+  description: "AI technical phone screens for software engineers",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  openGraph: {
+    title: "Shadows",
+    description: "AI technical phone screens for software engineers",
+    siteName: "Shadows",
+  },
+  twitter: {
+    title: "Shadows",
+    description: "AI technical phone screens for software engineers",
+  },
 };
 
 export default function RootLayout({
@@ -15,6 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/favicon.svg" />
+      </head>
       <body className={`antialiased`}>
         <Providers>{children}</Providers>
       </body>

@@ -28,9 +28,10 @@ type CommandBarProps = {
   sessionStartedAt?: string | null;
   durationMinutes?: number;
   onTimeExpired?: () => void;
+  onHangUp?: () => void;
 }
 
-export default function CommandBar({ testResults, sessionStartedAt, durationMinutes = 30, onTimeExpired }: CommandBarProps) {
+export default function CommandBar({ testResults, sessionStartedAt, durationMinutes = 30, onTimeExpired, onHangUp }: CommandBarProps) {
   // Only subscribe to the specific store values we need - NOT code
   const micStatus = useEditorStore((s) => s.micStatus)
   const toggleMic = useEditorStore((s) => s.toggleMic)
@@ -41,72 +42,56 @@ export default function CommandBar({ testResults, sessionStartedAt, durationMinu
   const handleHangUp = async () => {
     setIsGeneratingReport(true)
     
-    try {
-      // Get sessionId from URL params
-      const sessionId = params.sessionId as string
-      
-      // Get code and language from store at submission time (not subscribed)
-      const { code, language } = useEditorStore.getState()
-      
-      // Format transcript with elapsed time from session start
-      const sessionStartMs = sessionStartedAt ? new Date(sessionStartedAt).getTime() : null
-      const transcript = transcriptItems
-        .filter(item => item.type === "MESSAGE" && !item.isHidden)
-        .map(item => {
-          if (sessionStartMs && item.createdAtMs) {
-            const elapsedSeconds = Math.floor((item.createdAtMs - sessionStartMs) / 1000)
-            const timestamp = formatTime(Math.max(0, elapsedSeconds))
-            return `[${timestamp}] ${item.role}: ${item.title}`
-          }
-          return `${item.role}: ${item.title}`
-        })
-        .join("\n")
-      
-      console.log('=== Sending to Report API ===');
-      console.log('Session ID:', sessionId);
-      console.log('Transcript length:', transcript.length, 'chars');
-      console.log('Transcript items count:', transcriptItems.filter(item => item.type === "MESSAGE" && !item.isHidden).length);
-      console.log('First 500 chars:', transcript.slice(0, 500));
-      console.log('=============================');
-      
-      // Calculate session duration
-      const startTime = transcriptItems[0]?.createdAtMs || Date.now()
-      const endTime = Date.now()
-      const durationMs = endTime - startTime
-      const calcDurationMinutes = Math.floor(durationMs / 60000)
-      const durationSeconds = Math.floor((durationMs % 60000) / 1000)
-      
-      // Send to report endpoint
-      const response = await fetch('/api/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          transcript,
-          code,
-          questionUri: params.name as string,
-          testResults: testResults || [],
-          metadata: {
-            questionUri: params.name as string,
-            language,
-            duration: `${calcDurationMinutes}m ${durationSeconds}s`,
-          }
-        })
+    // Get sessionId from URL params
+    const sessionId = params.sessionId as string
+    
+    // Get code and language from store at submission time (not subscribed)
+    const { code, language } = useEditorStore.getState()
+    
+    // Format transcript with elapsed time from session start
+    const sessionStartMs = sessionStartedAt ? new Date(sessionStartedAt).getTime() : null
+    const transcript = transcriptItems
+      .filter(item => item.type === "MESSAGE" && !item.isHidden)
+      .map(item => {
+        if (sessionStartMs && item.createdAtMs) {
+          const elapsedSeconds = Math.floor((item.createdAtMs - sessionStartMs) / 1000)
+          const timestamp = formatTime(Math.max(0, elapsedSeconds))
+          return `[${timestamp}] ${item.role}: ${item.title}`
+        }
+        return `${item.role}: ${item.title}`
       })
-      
-      if (!response.ok) {
-        console.error('Failed to generate report:', await response.text())
-      } else {
-        const result = await response.json()
-        console.log('Report generated:', result)
-        // Navigate to report page
-        window.location.href = `/report/${sessionId}`
-      }
-    } catch (error) {
-      console.error('Error generating report:', error)
-    } finally {
-      setIsGeneratingReport(false)
-    }
+      .join("\n")
+    
+    // Calculate session duration
+    const startTime = transcriptItems[0]?.createdAtMs || Date.now()
+    const endTime = Date.now()
+    const durationMs = endTime - startTime
+    const calcDurationMinutes = Math.floor(durationMs / 60000)
+    const durationSeconds = Math.floor((durationMs % 60000) / 1000)
+    
+    // Fire off the report generation (don't await - let it run in background)
+    fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId,
+        transcript,
+        code,
+        questionUri: params.name as string,
+        testResults: testResults || [],
+        metadata: {
+          questionUri: params.name as string,
+          language,
+          duration: `${calcDurationMinutes}m ${durationSeconds}s`,
+        }
+      })
+    }).catch(err => console.error('Report generation error:', err))
+    
+    // Disable the leave warning before redirecting
+    onHangUp?.()
+    
+    // Redirect immediately to reports page
+    window.location.href = `/reports`
   }
 
   return (

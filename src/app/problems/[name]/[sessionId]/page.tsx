@@ -55,6 +55,7 @@ function EditorWithRealtime() {
     setShowLeaveWarning,
     handleConfirmLeave,
     handleCancelLeave,
+    disableLeaveWarning,
   } = useSessionManagement({ sessionId, questionUri })
 
   // Data queries
@@ -182,8 +183,7 @@ function EditorWithRealtime() {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(() => {})
-      .catch((err) => {
-        console.error("Microphone permission check failed:", err)
+      .catch(() => {
         setMicStatus("RESTRICTED")
       })
   }, [setMicStatus])
@@ -323,8 +323,7 @@ function EditorWithRealtime() {
           setMicStatus("ENABLED")
           mute(false)
         })
-        .catch((err) => {
-          console.error("Microphone permission denied:", err)
+        .catch(() => {
           setMicStatus("RESTRICTED")
         })
     } else {
@@ -364,6 +363,7 @@ function EditorWithRealtime() {
         sessionStartedAt={timerEnabled ? sessionStartedAt : null}
         durationMinutes={SESSION_DURATION_MINUTES}
         onTimeExpired={handleAutoSubmit}
+        onHangUp={disableLeaveWarning}
       />
       <ResizablePanelGroup direction="horizontal" className="w-full h-screen rounded-lg border md:min-w-[450px]">
         <ResizablePanel defaultSize={40}>

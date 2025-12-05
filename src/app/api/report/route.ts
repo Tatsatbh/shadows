@@ -11,14 +11,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { sessionId, transcript, code, questionUri, testResults, metadata } = body;
 
-    // Log incoming request for debugging
-    console.log('=== Report API Request ===');
-    console.log('sessionId:', sessionId);
-    console.log('questionUri:', questionUri);
-    console.log('transcript type:', typeof transcript);
-    console.log('transcript value:', transcript === undefined ? 'undefined' : transcript === null ? 'null' : `"${transcript.slice(0, 100)}..."`);
-    console.log('========================');
-
     if (!sessionId || transcript === undefined || transcript === null || !questionUri) {
       return NextResponse.json(
         { error: 'Missing required fields: sessionId, transcript, and questionUri' },
@@ -85,10 +77,8 @@ export async function POST(req: NextRequest) {
       console.error('Failed to fetch submissions:', submissionsError);
     }
 
-    // Build submission timeline with diffs for AI analysis
     const subs = submissions || [];
     const submissionTimeline = subs.map((sub, i) => {
-      const prevCode = i > 0 ? subs[i - 1].code : null;
       const testsPassed = sub.result_json?.submissions?.filter((r: any) => r.status?.id === 3).length || 0;
       const totalTestsInSub = sub.result_json?.submissions?.length || 0;
       return {
@@ -96,18 +86,9 @@ export async function POST(req: NextRequest) {
         timestamp: sub.created_at,
         testsPassed: `${testsPassed}/${totalTestsInSub}`,
         code: sub.code,
-        diff: prevCode ? `Changed from previous submission` : 'Initial submission',
       };
-    }).slice(-5); // Only include last 5 submissions to save tokens
+    }).slice(-5);
 
-    // Log all content lengths for debugging
-    console.log('=== Content Stats ===');
-    console.log('Transcript length:', transcript.length, 'chars');
-    console.log('Code length:', code?.length || 0, 'chars');
-    console.log('Question description length:', question.description_md?.length || 0, 'chars');
-    console.log('Test results JSON length:', JSON.stringify(enrichedTestResults).length, 'chars');
-    console.log('=====================');
-    
     // Truncate transcript if needed
     const MAX_TRANSCRIPT_CHARS = 80000;
     let truncatedTranscript = transcript;
@@ -152,7 +133,12 @@ Please evaluate this candidate across the following dimensions and provide a str
 
 1. Problem Solving (1-5): How well did they understand and approach the problem?
 2. Code Quality (1-5): Is the code clean, readable, and well-structured?
-3. Communication (1-5): How clearly did they explain their thinking?
+3. Communication (1-5): How clearly did they explain their thinking? Pay special attention to:
+   - Clarity and articulation of their approach
+   - Ability to explain reasoning step-by-step
+   - Responsiveness to interviewer questions
+   - Abnormally long silent pauses (gaps of 30+ seconds without speaking) - these indicate difficulty thinking through the problem or lack of communication
+   - Frequency and duration of hesitations or "umms" and "ahhs"
 4. Debugging (1-5): How effectively did they identify and fix issues?
 
 For each dimension, provide:
@@ -163,7 +149,7 @@ For each dimension, provide:
 Finally, provide an overall recommendation: "Strong Hire", "Hire", "Maybe", or "No Hire"
 
 Submission Timeline (${submissionTimeline.length} submissions):
-${submissionTimeline.map((s, i) => 
+${submissionTimeline.map((s) => 
   `--- Submission #${s.submissionNumber} (${s.testsPassed} tests passed) ---\n\`\`\`\n${s.code.slice(0, 1500)}\n\`\`\``
 ).join('\n\n')}
 
@@ -196,11 +182,6 @@ Return your response as a JSON object with this structure:
     });
 
     const scorecard = JSON.parse(completion.choices[0].message.content || '{}');
-    
-    // Log the OpenAI response for debugging
-    console.log('=== OpenAI gpt-5-mini Evaluation Response ===');
-    console.log(JSON.stringify(scorecard, null, 2));
-    console.log('=========================================');
 
     // Update session status to completed and store final data
     const { error: updateError } = await supabase

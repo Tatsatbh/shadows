@@ -43,19 +43,6 @@ export default function QuestionBar() {
 
 
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col w-full h-full">
-        <Card className="border-none shadow-none flex flex-col h-full overflow-y-auto">
-          <CardHeader className="items-start">
-            <CardTitle className="text-2xl">Loading…</CardTitle>
-          </CardHeader>
-          <CardContent>Fetching question…</CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   if (isLoading || !data) {
     return (
       <div className="flex flex-col w-full h-full">

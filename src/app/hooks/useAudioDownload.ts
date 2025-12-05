@@ -16,8 +16,7 @@ function useAudioDownload() {
     let micStream: MediaStream;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      console.error("Error getting microphone stream:", err);
+    } catch {
       // Fallback to an empty MediaStream if microphone access fails.
       micStream = new MediaStream();
     }

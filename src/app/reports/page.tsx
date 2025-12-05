@@ -20,6 +20,9 @@ import {
 import { SessionsTable } from "@/components/sessions-table"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Spinner } from "@/components/ui/spinner"
+import { useQuery } from "@tanstack/react-query"
+import { fetchAllSessions } from "@/lib/queries"
 
 export default function ReportsPage() {
   const router = useRouter()
@@ -41,6 +44,25 @@ export default function ReportsPage() {
 
     checkAuth()
   }, [router])
+
+  // Poll for in-progress sessions
+  const { data: sessions } = useQuery({
+    queryKey: ["allSessions", userId],
+    queryFn: () => fetchAllSessions(userId!),
+    enabled: !!userId,
+    refetchInterval: (query) => {
+      // Check if any sessions are in_progress
+      const hasInProgress = query.state.data?.some(
+        (session: any) => session.status === "in_progress"
+      )
+      // Poll every 2 seconds if there are in-progress sessions, otherwise don't poll
+      return hasInProgress ? 2000 : false
+    },
+  })
+
+  const hasInProgressSessions = sessions?.some(
+    (session: any) => session.status === "in_progress"
+  )
 
   if (isChecking) {
     return null
@@ -75,6 +97,17 @@ export default function ReportsPage() {
             <h1 className="text-2xl font-bold text-foreground mb-2">All Reports</h1>
             <p className="text-muted-foreground text-sm">View all your interview sessions and reports</p>
           </div>
+          {hasInProgressSessions && (
+            <div className="rounded-xl border bg-card p-4 flex items-center gap-3">
+              <Spinner className="h-5 w-5" />
+              <div>
+                <p className="font-medium">Processing your interview...</p>
+                <p className="text-sm text-muted-foreground">
+                  Your report is being generated. This may take a minute.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="rounded-xl border bg-card">
             <SessionsTable />
           </div>
