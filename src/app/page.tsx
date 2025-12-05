@@ -31,7 +31,7 @@ export default function LandingPage() {
   return (
     <div className={`min-h-screen bg-void-page text-light-primary ${poppins.className}`}>
       <header className="fixed top-0 left-0 right-0 z-50 bg-void-page/80 backdrop-blur-sm border-b border-edge-subtle">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`${minecraft.className} text-2xl text-white`}>shadows.sh</span>
           </div>
