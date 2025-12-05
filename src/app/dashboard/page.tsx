@@ -94,7 +94,6 @@ export default function Page() {
                 questionNumber={problem.question_number}
                 title={problem.title}
                 difficulty={problem.difficulty}
-                questionUri={problem.question_uri}
                 onClick={() => {
                   const sessionId = nanoid()
                   // Store session creation token to prevent direct URL access
