@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { FlipWords } from "@/components/ui/flip-words"
 import { HeroPreview } from "@/components/app/HeroPreview"
-import { InfiniteCarousel } from "@/components/ui/infinite-carousel"
+
 import { SignInDialog } from "@/components/app/SignInDialog"
 import Link from "next/link"
 import localFont from 'next/font/local'
@@ -95,36 +95,7 @@ The first AI Interviewer that runs your code, judges your voice, and catches you
           </div>
         </div>
       </section>
-      <section className="pb-32">
-        <div className="max-w-7xl mx-auto px-8">
-          <p className="text-center text-sm text-light-muted mb-8 font-medium tracking-wide uppercase">
-            Used by Students AND Engineers from top institutions
-          </p>
-          <InfiniteCarousel
-            items={[
-              { src: "/google.png", alt: "Google" },
-              { src: "/amazon.svg", alt: "Amazon" },
-              { src: "/meta.png", alt: "Meta" },
-              { src: "/microsoft.png", alt: "Microsoft" },
-              { src: "/openai-logomark.svg", alt: "OpenAI" },
-            ]}
-            speed={25}
-            sizeMultipliers={{
-              "google.png": 1.0,
-              "meta.png": 2.0,
-              "amazon.svg": 1.0,
-              "microsoft.png":0.8
-            }}
-            paddingMultipliers={{
-              "google.png": { top: 0, right: 5, bottom: 0, left: 5 },
-              "amazon.svg": { top: 15, right: 2, bottom: 0, left: 6 },
-              "meta.png": { top: 0, right: 0, bottom: 0, left: 26 },
-              "microsoft.png": { top: 0, right: 0, bottom: 0, left: 50 },
-              "netflix.png": { top: 0, right: 4, bottom: 0, left: 3 }
-            }}
-          />
-        </div>
-      </section>
+
     </div>
   )
 }
