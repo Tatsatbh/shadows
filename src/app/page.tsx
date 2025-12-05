@@ -68,9 +68,9 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="text-lg text-light-muted mb-8 max-w-2xl leading-relaxed">
-              Don't practice in a vacuum. Shadowbox with a Senior Engineer.
+              Don&apos;t practice in a vacuum. Shadowbox with a Senior Engineer.
 
-The first AI Interviewer that runs your code, judges your voice, and catches your edge cases in real-time. Stop guessing if you're ready. Prove it.
+The first AI Interviewer that runs your code, judges your voice, and catches your edge cases in real-time. Stop guessing if you&apos;re ready. Prove it.
             </p>
             <div className="flex items-center gap-4">
               <SignInDialog>

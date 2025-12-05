@@ -123,7 +123,8 @@ export async function GET(request: Request) {
                 
                 const MAX_ERROR_LENGTH = 500
                 const decodedSubmissions = judgeResponse.submissions.map((sub: any) => {
-                    const { compile_output, ...rest } = sub
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { compile_output: _compileOutput, ...rest } = sub
                     
                     // Decode stderr and truncate if too long to save LLM tokens
                     const decodedStderr = sub.stderr ? Buffer.from(sub.stderr, 'base64').toString('utf-8') : null

@@ -3,16 +3,13 @@ import { useEffect } from "react";
 import { Badge } from "../ui/badge";
 import {
   Card,
-  CardAction,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from "remark-gfm";
-import { usePathname, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useQuery } from "@tanstack/react-query";
 import { fetchQuestionByUri } from "@/lib/queries";
 import { useQuestionStore } from "@/store";
@@ -29,7 +26,7 @@ export default function QuestionBar() {
 
   const setQuestion = useQuestionStore((s) => s.setQuestionText)
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['question', params.name],
     queryFn: () => fetchQuestionByUri(params.name as string),
     enabled: !!params.name,

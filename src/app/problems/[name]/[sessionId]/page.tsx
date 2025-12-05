@@ -165,7 +165,7 @@ function EditorWithRealtime() {
 
   // Realtime connection state
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>("DISCONNECTED")
-  const [isPTTActive, setIsPTTActive] = useState(false)
+  const [isPTTActive] = useState(false)
 
   const handleConnectionChange = useCallback((status: SessionStatus) => {
     setSessionStatus(status)

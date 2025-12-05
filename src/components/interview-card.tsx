@@ -8,7 +8,6 @@ interface InterviewCardProps {
   questionNumber: number
   title: string
   difficulty: 'Easy' | 'Medium' | 'Hard'
-  questionUri: string
   onClick?: () => void
 }
 
@@ -22,7 +21,6 @@ export function InterviewCard({
   questionNumber,
   title,
   difficulty,
-  questionUri,
   onClick,
 }: InterviewCardProps) {
   return (
