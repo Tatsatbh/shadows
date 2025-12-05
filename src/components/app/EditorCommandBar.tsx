@@ -18,6 +18,7 @@ type EditorCommandBarProps = {
   onLanguageChange: (value: string) => void
   className?: string
   onRun?: () => void
+  onSubmit?: () => void
   isRunning?: boolean
 }
 
@@ -26,6 +27,7 @@ export default function EditorCommandBar({
   onLanguageChange,
   className,
   onRun,
+  onSubmit,
   isRunning = false,
 }: EditorCommandBarProps) {
 
