@@ -1,12 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FlipWords } from "@/components/ui/flip-words"
 import { HeroPreview } from "@/components/app/HeroPreview"
 
 import { SignInDialog } from "@/components/app/SignInDialog"
-import Link from "next/link"
 import localFont from 'next/font/local'
+import { Menu, X } from "lucide-react"
 
 import { Poppins } from 'next/font/google'
 const poppins = Poppins({
@@ -25,32 +26,46 @@ const minecraft = localFont({
 })
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className={`min-h-screen bg-void-page text-light-primary ${poppins.className}`}>
       <header className="fixed top-0 left-0 right-0 z-50 bg-void-page/80 backdrop-blur-sm border-b border-edge-subtle">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`${minecraft.className} text-2xl text-white`}>shadows.sh</span>
           </div>
-          <nav className="flex items-center gap-8">
-            <Link href="#features" className="text-sm text-light-muted hover:text-light-primary transition-colors">
-              Features
-            </Link>
-            <Link href="#pricing" className="text-sm text-light-muted hover:text-light-primary transition-colors">
-              Pricing
-            </Link>
+          
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8">
             <SignInDialog>
               <Button variant="ghost" size="sm" className="text-sm text-light-muted hover:text-light-primary hover:bg-transparent">
                 Login
               </Button>
             </SignInDialog>
-            <SignInDialog>
-              <Button size="sm" className="bg-white text-black hover:bg-white/90 rounded-md h-8 px-4 text-sm font-medium">
-                Signup
-              </Button>
-            </SignInDialog>
           </nav>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-2 text-light-muted hover:text-light-primary"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-void-page border-t border-edge-subtle">
+            <div className="px-4 py-4 flex flex-col gap-4">
+              <SignInDialog>
+                <Button variant="ghost" className="w-full justify-start text-light-muted hover:text-light-primary hover:bg-transparent">
+                  Login
+                </Button>
+              </SignInDialog>
+            </div>
+          </div>
+        )}
       </header>
       <section className="pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-8">
