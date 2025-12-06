@@ -594,7 +594,7 @@ export default function ReportPage() {
         <div className="text-center">
           <Lock className="mx-auto mb-4 text-muted-foreground" size={48} />
           <p className="text-destructive font-medium">{error}</p>
-          <p className="text-muted-foreground text-sm mt-1">You don't have permission to view this report</p>
+          <p className="text-muted-foreground text-sm mt-1">You don&apos;t have permission to view this report</p>
         </div>
       </div>
     )
