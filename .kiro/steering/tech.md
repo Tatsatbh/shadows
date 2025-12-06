@@ -136,6 +136,7 @@ create table public.sessions (
   final_code text null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
+  visibility text not null default 'private'::text,
   constraint sessions_pkey primary key (id),
   constraint sessions_question_id_fkey foreign KEY (question_id) references questions (id) on delete CASCADE,
   constraint sessions_user_id_fkey foreign KEY (user_id) references auth.users (id) on delete set null,
@@ -146,6 +147,17 @@ create table public.sessions (
           'in_progress'::text,
           'completed'::text,
           'abandoned'::text
+        ]
+      )
+    )
+  ),
+  constraint sessions_visibility_check check (
+    (
+      visibility = any (
+        array[
+          'private'::text,
+          'public'::text,
+          'unlisted'::text
         ]
       )
     )

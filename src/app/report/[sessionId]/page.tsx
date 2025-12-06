@@ -4,7 +4,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { diffLines, Change } from "diff"
-import { ChevronRight, CheckCircle2, XCircle, MessageSquare } from "lucide-react"
+import { ChevronRight, CheckCircle2, XCircle, MessageSquare, Globe, Lock, Link2, Check, Copy } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
 
 interface Submission {
@@ -69,6 +76,141 @@ interface SessionData {
     scorecard?: Scorecard
     testResults?: any[]
   } | null
+  visibility?: 'private' | 'public' | 'unlisted'
+}
+
+type Visibility = 'private' | 'public' | 'unlisted'
+
+const visibilityConfig = {
+  private: { 
+    icon: Lock, 
+    label: 'Private', 
+    color: 'text-zinc-500',
+    bg: 'bg-zinc-100 dark:bg-zinc-800'
+  },
+  unlisted: { 
+    icon: Link2, 
+    label: 'Unlisted', 
+    color: 'text-blue-500',
+    bg: 'bg-blue-50 dark:bg-blue-500/20'
+  },
+  public: { 
+    icon: Globe, 
+    label: 'Public', 
+    color: 'text-green-500',
+    bg: 'bg-green-50 dark:bg-green-500/20'
+  },
+}
+
+function VisibilityLabel({ visibility }: { visibility: Visibility }) {
+  const config = visibilityConfig[visibility]
+  const Icon = config.icon
+  
+  return (
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${config.bg}`}>
+      <Icon size={14} className={config.color} />
+      <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
+    </div>
+  )
+}
+
+function PrivacyDropdown({ 
+  sessionId, 
+  currentVisibility, 
+  onVisibilityChange,
+  isOwner
+}: { 
+  sessionId: string
+  currentVisibility: Visibility
+  onVisibilityChange: (visibility: Visibility) => void
+  isOwner: boolean
+}) {
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleVisibilityChange = async (value: Visibility) => {
+    setIsUpdating(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('sessions')
+        .update({ visibility: value })
+        .eq('id', sessionId)
+      
+      if (error) throw error
+      onVisibilityChange(value)
+    } catch (err) {
+      console.error('Failed to update visibility:', err)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const copyShareLink = async () => {
+    const url = `${window.location.origin}/report/${sessionId}`
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const current = visibilityConfig[currentVisibility]
+  const CurrentIcon = current.icon
+
+  // Non-owners just see a label
+  if (!isOwner) {
+    return <VisibilityLabel visibility={currentVisibility} />
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Select 
+        value={currentVisibility} 
+        onValueChange={(v) => handleVisibilityChange(v as Visibility)}
+        disabled={isUpdating}
+      >
+        <SelectTrigger className="w-[140px] h-9">
+          <div className="flex items-center gap-2">
+            <CurrentIcon size={14} className={`${current.color} shrink-0`} />
+            <span className="text-sm">{current.label}</span>
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(visibilityConfig).map(([key, config]) => {
+            const Icon = config.icon
+            return (
+              <SelectItem key={key} value={key}>
+                <div className="flex items-center gap-2">
+                  <Icon size={14} className={`${config.color} shrink-0`} />
+                  <span>{config.label}</span>
+                </div>
+              </SelectItem>
+            )
+          })}
+        </SelectContent>
+      </Select>
+      
+      {currentVisibility !== 'private' && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={copyShareLink}
+          className="h-9 px-3"
+        >
+          {copied ? (
+            <>
+              <Check size={14} className="mr-1.5 text-green-500" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy size={14} className="mr-1.5" />
+              Copy Link
+            </>
+          )}
+        </Button>
+      )}
+    </div>
+  )
 }
 
 function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
@@ -388,13 +530,15 @@ export default function ReportPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [visibility, setVisibility] = useState<Visibility>('private')
+  const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const supabase = createClient()
         
-        const [sessionRes, submissionsRes] = await Promise.all([
+        const [sessionRes, submissionsRes, userRes] = await Promise.all([
           supabase
             .from('sessions')
             .select('*')
@@ -404,14 +548,28 @@ export default function ReportPage() {
             .from('submissions')
             .select('*')
             .eq('session_id', sessionId)
-            .order('created_at', { ascending: true })
+            .order('created_at', { ascending: true }),
+          supabase.auth.getUser()
         ])
 
         if (sessionRes.error) throw sessionRes.error
         if (submissionsRes.error) throw submissionsRes.error
 
+        const currentUserId = userRes.data?.user?.id
+        const sessionVisibility = sessionRes.data?.visibility || 'private'
+        const ownsSession = currentUserId === sessionRes.data?.user_id
+
+        // Access control: private reports only visible to owner
+        if (sessionVisibility === 'private' && !ownsSession) {
+          setError('This report is private')
+          setLoading(false)
+          return
+        }
+
         setSessionData(sessionRes.data)
         setSubmissions(submissionsRes.data || [])
+        setVisibility(sessionVisibility)
+        setIsOwner(ownsSession)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
@@ -433,7 +591,11 @@ export default function ReportPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-destructive">Error: {error}</p>
+        <div className="text-center">
+          <Lock className="mx-auto mb-4 text-muted-foreground" size={48} />
+          <p className="text-destructive font-medium">{error}</p>
+          <p className="text-muted-foreground text-sm mt-1">You don't have permission to view this report</p>
+        </div>
       </div>
     )
   }
@@ -449,11 +611,19 @@ export default function ReportPage() {
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Session Report</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {submissions.length} submissions • {totalPassed}/{totalTests} total test runs passed
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Session Report</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {submissions.length} submissions • {totalPassed}/{totalTests} total test runs passed
+            </p>
+          </div>
+          <PrivacyDropdown 
+            sessionId={sessionId}
+            currentVisibility={visibility}
+            onVisibilityChange={setVisibility}
+            isOwner={isOwner}
+          />
         </div>
 
         <div className="hidden lg:flex gap-6">
