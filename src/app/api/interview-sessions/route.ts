@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
-// GET - Validate that a session exists and belongs to the user
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -17,20 +16,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing sessionId" }, { status: 400 })
     }
 
-    // Check if session exists and belongs to this user
     const { data: session, error: sessionError } = await supabase
       .from("sessions")
       .select("id, user_id, status, started_at")
       .eq("id", sessionId)
+      .eq("user_id", user.id)
       .single()
 
     if (sessionError || !session) {
       return NextResponse.json({ valid: false, reason: "not_found" })
-    }
-
-    // Verify the session belongs to this user
-    if (session.user_id !== user.id) {
-      return NextResponse.json({ valid: false, reason: "unauthorized" })
     }
 
     return NextResponse.json({ valid: true, session })
@@ -62,7 +56,6 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Update session status
     const { data: session, error: sessionError } = await supabase
       .from("sessions")
       .update({
@@ -111,7 +104,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get question_id from question_uri
     const { data: question, error: questionError } = await supabase
       .from("questions")
       .select("id")
@@ -125,7 +117,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create session (or ignore if already exists)
     const { data: session, error: sessionError } = await supabase
       .from("sessions")
       .upsert({
@@ -142,9 +133,8 @@ export async function POST(request: NextRequest) {
 
     if (sessionError) {
       console.error("Session creation error:", sessionError)
-      console.error("Session error details:", JSON.stringify(sessionError, null, 2))
       return NextResponse.json(
-        { error: "Failed to create session", details: sessionError.message },
+        { error: "Failed to create session" },
         { status: 500 }
       )
     }
