@@ -1,3 +1,7 @@
+## Note for Kiro Judges:
+The submission version of this project is preserved on the hackathon-submission branch. The main branch contains active post-hackathon development.
+
+
 # Shadows
 
 AI-powered technical phone screens for software engineers. We handle first-round interviews so your engineering team can focus on building.

@@ -6,6 +6,8 @@ import { FlipWords } from "@/components/ui/flip-words"
 import { HeroPreview } from "@/components/app/HeroPreview"
 
 import { SignInDialog } from "@/components/app/SignInDialog"
+import { WaitlistDialog } from "@/components/app/WaitlistDialog"
+import { TerminalButton } from "@/components/ui/terminal-button"
 import localFont from 'next/font/local'
 import { Menu, X } from "lucide-react"
 
@@ -32,8 +34,11 @@ export default function LandingPage() {
     <div className={`min-h-screen bg-void-page text-light-primary ${poppins.className}`}>
       <header className="fixed top-0 left-0 right-0 z-50 bg-void-page/80 backdrop-blur-sm border-b border-edge-subtle">
         <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className={`${minecraft.className} text-2xl text-white`}>shadows.sh</span>
+            <span className="px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded">
+              beta
+            </span>
           </div>
           
           {/* Desktop nav */}
@@ -76,7 +81,7 @@ export default function LandingPage() {
               <span className="flex items-center gap-3 flex-wrap">
                 with questions featured in
                 <FlipWords
-                  words={["Neetcode 150", "Blind 75", "Neecode 250", "Top Interview 150"]}
+                  words={["Neetcode 150", "Blind 75", "Neetcode 250", "Top Interview 150"]}
                   duration={2500}
                   className={`${jetbrainsMono.className} font-bold px-0`}
                 />
@@ -88,11 +93,9 @@ export default function LandingPage() {
 The first AI Interviewer that runs your code, judges your voice, and catches your edge cases in real-time. Stop guessing if you&apos;re ready. Prove it.
             </p>
             <div className="flex items-center gap-4">
-              <SignInDialog>
-                <Button size="lg" className="bg-white text-black hover:bg-white/90 rounded-md h-11 px-6 text-sm font-medium">
-                  Get Started
-                </Button>
-              </SignInDialog>
+              <WaitlistDialog>
+                <TerminalButton>REQUEST_ACCESS</TerminalButton>
+              </WaitlistDialog>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { supabaseAdmin } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { data: question, error: questionError } = await supabaseAdmin
+  const supabase = await createClient();
+  
+  const { data: question, error: questionError } = await supabase
     .from('questions')
     .select('id, title, description_md, difficulty')
     .eq('question_uri', questionUri)
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { data: testCases, error: testCasesError } = await supabaseAdmin
+  const { data: testCases, error: testCasesError } = await supabase
     .from('test_cases')
     .select('id, input, expected_output, hidden')
     .eq('question_id', question.id)
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
   const passedTests = enrichedTestResults.filter(t => t.status === 'passed').length;
   const failedTests = enrichedTestResults.filter(t => t.status === 'failed').length;
 
-  const { data: submissions, error: submissionsError } = await supabaseAdmin
+  const { data: submissions, error: submissionsError } = await supabase
     .from('submissions')
     .select('id, code, created_at, result_json')
     .eq('session_id', sessionId)
@@ -169,13 +171,13 @@ Return your response as a JSON object with this structure:
         content: evaluationPrompt,
       },
     ],
-    reasoning_effort: 'high', 
+    reasoning_effort: 'high',
     response_format: { type: 'json_object' },
   });
 
   const scorecard = JSON.parse(completion.choices[0].message.content || '{}');
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await supabase
     .from('sessions')
     .update({
       status: 'completed',

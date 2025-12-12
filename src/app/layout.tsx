@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./lib/envSetup";
 import Providers from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Shadows",
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
       <body className={`antialiased`}>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

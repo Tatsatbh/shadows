@@ -61,8 +61,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="flex flex-1 items-center gap-2 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Shadows</span>
+                  <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
+                    BETA
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
