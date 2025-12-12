@@ -38,15 +38,12 @@ interface SessionsTableProps {
 
 export function SessionsTable({ limit }: SessionsTableProps) {
   const [userId, setUserId] = useState<string | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     const getUserId = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUserId(user.id)
-      }
+      if (user) setUserId(user.id)
     }
     getUserId()
   }, [])
@@ -57,7 +54,6 @@ export function SessionsTable({ limit }: SessionsTableProps) {
     enabled: !!userId,
   })
 
-  // Normalize and slice sessions based on limit prop
   const sessions: Session[] = useMemo(() => {
     if (!allSessions) return []
     const normalized = allSessions.map((session): Session => ({
@@ -123,18 +119,15 @@ export function SessionsTable({ limit }: SessionsTableProps) {
         </TableHeader>
         <TableBody>
           {sessions.map((session) => {
-            const isAbandoned = session.status === 'abandoned'
+            const isDisabled = session.status === 'abandoned' || session.status === 'in_progress'
             return (
               <TableRow 
                 key={session.id}
-                className={isAbandoned ? 'opacity-50 cursor-not-allowed h-16' : 'cursor-pointer hover:bg-muted/50 h-16'}
+                className={isDisabled ? 'opacity-50 cursor-not-allowed h-16' : 'cursor-pointer hover:bg-muted/50 h-16'}
                 onClick={() => {
-                  if (isAbandoned) return
+                  if (isDisabled) return
                   if (session.status === 'completed') {
                     window.open(`/report/${session.id}`, '_blank', 'noopener,noreferrer')
-                  } else {
-                    const questionUri = session.questions?.title?.toLowerCase().replace(/\s+/g, '-') || ''
-                    router.push(`/problems/${questionUri}/${session.id}`)
                   }
                 }}
               >

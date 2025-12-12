@@ -48,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userData = {
     name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User",
     email: user?.email || "",
-    avatar: user?.user_metadata?.avatar_url || "/avatars/shadcn.jpg",
+    avatar: user?.user_metadata?.avatar_url || "",
   }
 
   return (

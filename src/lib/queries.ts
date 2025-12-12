@@ -1,7 +1,7 @@
-import { supabase } from './supabaseClient'
+import { createClient } from './supabase/client'
 
 export const fetchQuestionByUri = async (uri: string) => {
-  // First fetch the question
+  const supabase = createClient()
   const { data: question, error: questionError } = await supabase
     .from('questions')
     .select('*')
@@ -10,7 +10,6 @@ export const fetchQuestionByUri = async (uri: string) => {
 
   if (questionError) throw new Error(questionError.message)
 
-  // Then fetch related data separately
   const { data: starterCodes } = await supabase
     .from('starter_codes')
     .select('language, code')
@@ -29,6 +28,7 @@ export const fetchQuestionByUri = async (uri: string) => {
 }
 
 export const fetchStarterCode = async (language: string, uri: string) => {
+  const supabase = createClient()
   const { data, error } = await supabase
   .from('starter_codes')
   .select(`
@@ -49,6 +49,7 @@ export const fetchStarterCode = async (language: string, uri: string) => {
 }
 
 export const fetchProblems = async () => {
+  const supabase = createClient()
   const { data: problems, error } = await supabase
     .from('questions')
     .select('id, question_number, title, difficulty, summary, question_uri')
@@ -59,6 +60,7 @@ export const fetchProblems = async () => {
 }
 
 export const fetchTestCasesMetadata = async (questionUri: string) => {
+  const supabase = createClient()
   const { data: question, error: questionError } = await supabase
     .from('questions')
     .select('id')
@@ -67,7 +69,6 @@ export const fetchTestCasesMetadata = async (questionUri: string) => {
 
   if (questionError) throw new Error(questionError.message)
 
-  // Fetch ALL test cases with their IDs and hidden status
   const { data: allTestCases, error: allError } = await supabase
     .from('test_cases')
     .select('id, input, expected_output, hidden')
@@ -87,7 +88,6 @@ export const fetchTestCasesMetadata = async (questionUri: string) => {
     })),
     hiddenTestCases: hiddenTestCases.map(tc => ({
       id: tc.id,
-      // Don't send input/output to frontend for hidden cases
     })),
     totalCount: allTestCases?.length || 0,
     hiddenCount: hiddenTestCases.length
@@ -95,6 +95,7 @@ export const fetchTestCasesMetadata = async (questionUri: string) => {
 }
 
 export const fetchAllSessions = async (userId: string) => {
+  const supabase = createClient()
   const { data: sessions, error } = await supabase
     .from('sessions')
     .select(`
@@ -112,7 +113,5 @@ export const fetchAllSessions = async (userId: string) => {
     .order('started_at', { ascending: false })
   
   if (error) throw error
-  
-  // Just return sorted by started_at (latest first) - already sorted by Supabase
   return sessions
 }
