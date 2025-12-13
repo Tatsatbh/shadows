@@ -3,6 +3,7 @@ import "./globals.css";
 import "./lib/envSetup";
 import Providers from "./providers";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Shadows",
@@ -35,7 +36,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.svg" />
       </head>
       <body className={`antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Analytics />
+          </Providers>
         <Toaster />
       </body>
     </html>
