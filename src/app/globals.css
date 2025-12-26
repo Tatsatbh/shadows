@@ -131,4 +131,63 @@ body {
   .text-glow {
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
   }
+  
+  /* Glassmorphism effect */
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Glow effects for recommendation badges */
+  .glow-success {
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4),
+                0 0 60px rgba(34, 197, 94, 0.2);
+  }
+  
+  .glow-warning {
+    box-shadow: 0 0 30px rgba(234, 179, 8, 0.4),
+                0 0 60px rgba(234, 179, 8, 0.2);
+  }
+  
+  .glow-danger {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4),
+                0 0 60px rgba(239, 68, 68, 0.2);
+  }
+  
+  /* Gradient border animation */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05)) border-box;
+    border: 1px solid transparent;
+  }
+  
+  /* Shimmer animation for loading states */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
 }

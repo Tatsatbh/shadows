@@ -104,6 +104,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const { data: existingSession } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("id", sessionId)
+      .single()
+
+    if (existingSession) {
+      return NextResponse.json({ session: existingSession })
+    }
+
     const { data: question, error: questionError } = await supabase
       .from("questions")
       .select("id")
@@ -117,24 +127,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data: session, error: sessionError } = await supabase
+    const { error: rpcError } = await supabase.rpc('start_session', {
+      session_id: sessionId,
+      user_id: user.id,
+      question_id: question.id
+    })
+
+    if (rpcError) {
+      console.error("Session start RPC error:", rpcError)
+      return NextResponse.json(
+        { error: rpcError.message || "RPC failed" },
+        { status: rpcError.message === 'Insufficient credits' ? 402 : 500 }
+      )
+    }
+
+    const { data: session, error: fetchError } = await supabase
       .from("sessions")
-      .upsert({
-        id: sessionId,
-        user_id: user.id,
-        question_id: question.id,
-        status: "in_progress",
-      }, {
-        onConflict: 'id',
-        ignoreDuplicates: false
-      })
       .select()
+      .eq("id", sessionId)
       .single()
 
-    if (sessionError) {
-      console.error("Session creation error:", sessionError)
+    if (fetchError) {
+      console.error("Failed to fetch created session:", fetchError)
       return NextResponse.json(
-        { error: "Failed to create session" },
+        { error: "Session created but failed to fetch" },
         { status: 500 }
       )
     }

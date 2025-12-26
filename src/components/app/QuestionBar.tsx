@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchQuestionByUri } from "@/lib/queries";
 import { useQuestionStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { QuestionBarSkeleton } from "@/components/skeletons";
 
 const difficultyStyles = {
   Easy: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -41,16 +42,7 @@ export default function QuestionBar() {
 
 
   if (isLoading || !data) {
-    return (
-      <div className="flex flex-col w-full h-full">
-        <Card className="border-none shadow-none flex flex-col h-full overflow-y-auto">
-          <CardHeader className="items-start">
-            <CardTitle className="text-2xl">Loading…</CardTitle>
-          </CardHeader>
-          <CardContent>Fetching question…</CardContent>
-        </Card>
-      </div>
-    )
+    return <QuestionBarSkeleton />
   }
 
   return (

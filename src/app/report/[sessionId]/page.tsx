@@ -4,7 +4,22 @@ import { useParams } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { diffLines, Change } from "diff"
-import { ChevronRight, CheckCircle2, XCircle, MessageSquare, Globe, Lock, Link2, Check, Copy } from "lucide-react"
+import { motion } from "motion/react"
+import {
+  ChevronRight,
+  CheckCircle2,
+  XCircle,
+  MessageSquare,
+  Globe,
+  Lock,
+  Link2,
+  Check,
+  Copy,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Minus
+} from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -15,8 +30,6 @@ import {
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   Collapsible,
@@ -30,6 +43,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { RadarChart } from "@/components/ui/radar-chart"
 
 
 interface Submission {
@@ -82,30 +96,62 @@ interface SessionData {
 type Visibility = 'private' | 'public' | 'unlisted'
 
 const visibilityConfig = {
-  private: { 
-    icon: Lock, 
-    label: 'Private', 
+  private: {
+    icon: Lock,
+    label: 'Private',
     color: 'text-zinc-500',
     bg: 'bg-zinc-100 dark:bg-zinc-800'
   },
-  unlisted: { 
-    icon: Link2, 
-    label: 'Unlisted', 
+  unlisted: {
+    icon: Link2,
+    label: 'Unlisted',
     color: 'text-blue-500',
     bg: 'bg-blue-50 dark:bg-blue-500/20'
   },
-  public: { 
-    icon: Globe, 
-    label: 'Public', 
+  public: {
+    icon: Globe,
+    label: 'Public',
     color: 'text-green-500',
     bg: 'bg-green-50 dark:bg-green-500/20'
+  },
+}
+
+const recommendationConfig: Record<string, {
+  bg: string
+  text: string
+  glow: string
+  icon: typeof TrendingUp
+}> = {
+  'Strong Hire': {
+    bg: 'bg-emerald-500/20',
+    text: 'text-emerald-400',
+    glow: 'glow-success',
+    icon: TrendingUp
+  },
+  'Hire': {
+    bg: 'bg-green-500/20',
+    text: 'text-green-400',
+    glow: 'glow-success',
+    icon: TrendingUp
+  },
+  'Maybe': {
+    bg: 'bg-yellow-500/20',
+    text: 'text-yellow-400',
+    glow: 'glow-warning',
+    icon: Minus
+  },
+  'No Hire': {
+    bg: 'bg-red-500/20',
+    text: 'text-red-400',
+    glow: 'glow-danger',
+    icon: TrendingDown
   },
 }
 
 function VisibilityLabel({ visibility }: { visibility: Visibility }) {
   const config = visibilityConfig[visibility]
   const Icon = config.icon
-  
+
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${config.bg}`}>
       <Icon size={14} className={config.color} />
@@ -114,12 +160,12 @@ function VisibilityLabel({ visibility }: { visibility: Visibility }) {
   )
 }
 
-function PrivacyDropdown({ 
-  sessionId, 
-  currentVisibility, 
+function PrivacyDropdown({
+  sessionId,
+  currentVisibility,
   onVisibilityChange,
   isOwner
-}: { 
+}: {
   sessionId: string
   currentVisibility: Visibility
   onVisibilityChange: (visibility: Visibility) => void
@@ -136,7 +182,7 @@ function PrivacyDropdown({
         .from('sessions')
         .update({ visibility: value })
         .eq('id', sessionId)
-      
+
       if (error) throw error
       onVisibilityChange(value)
     } catch (err) {
@@ -156,15 +202,14 @@ function PrivacyDropdown({
   const current = visibilityConfig[currentVisibility]
   const CurrentIcon = current.icon
 
-  // Non-owners just see a label
   if (!isOwner) {
     return <VisibilityLabel visibility={currentVisibility} />
   }
 
   return (
     <div className="flex items-center gap-2">
-      <Select 
-        value={currentVisibility} 
+      <Select
+        value={currentVisibility}
         onValueChange={(v) => handleVisibilityChange(v as Visibility)}
         disabled={isUpdating}
       >
@@ -188,11 +233,11 @@ function PrivacyDropdown({
           })}
         </SelectContent>
       </Select>
-      
+
       {currentVisibility !== 'private' && (
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={copyShareLink}
           className="h-9 px-3"
         >
@@ -215,11 +260,11 @@ function PrivacyDropdown({
 
 function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
   const changes = useMemo(() => diffLines(oldCode, newCode), [oldCode, newCode])
-  
+
   return (
     <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto border border-border">
       {changes.map((change: Change, i: number) => {
-        const lines = change.value.split('\n').filter((_, idx, arr) => 
+        const lines = change.value.split('\n').filter((_, idx, arr) =>
           idx < arr.length - 1 || arr[idx] !== ''
         )
         return lines.map((line, j) => (
@@ -229,8 +274,8 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
               change.added
                 ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
                 : change.removed
-                ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
-                : "text-muted-foreground"
+                  ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                  : "text-muted-foreground"
             }
           >
             <span className="select-none opacity-50 mr-2">
@@ -244,44 +289,47 @@ function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
   )
 }
 
-function DimensionScore({ 
-  label, 
-  score, 
-  evidence, 
-  reasoning 
-}: { 
+function DimensionDetail({
+  label,
+  score,
+  evidence,
+  reasoning,
+  isActive,
+  onToggle
+}: {
   label: string
   score: number
   evidence: string
   reasoning: string
+  isActive: boolean
+  onToggle: () => void
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const color = score >= 4 ? 'bg-green-500' : score >= 3 ? 'bg-yellow-500' : 'bg-red-500'
-  
+  const scoreColor = score >= 4 ? 'text-emerald-400' : score >= 3 ? 'text-yellow-400' : 'text-red-400'
+  const scoreBg = score >= 4 ? 'bg-emerald-500/20' : score >= 3 ? 'bg-yellow-500/20' : 'bg-red-500/20'
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isActive} onOpenChange={onToggle}>
       <CollapsibleTrigger className="w-full">
-        <div className="flex items-center gap-3 py-2 hover:bg-accent rounded-lg px-2 -mx-2 transition-colors cursor-pointer">
-          <ChevronRight 
-            size={16} 
-            className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} 
+        <div className="flex items-center gap-3 py-3 px-4 hover:bg-accent/50 rounded-lg transition-colors cursor-pointer">
+          <ChevronRight
+            size={16}
+            className={`text-muted-foreground transition-transform duration-200 ${isActive ? 'rotate-90' : ''}`}
           />
-          <span className="text-sm text-foreground w-32 text-left">{label}</span>
-          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-            <div className={`h-full ${color} transition-all`} style={{ width: `${(score / 5) * 100}%` }} />
-          </div>
-          <span className="text-sm text-muted-foreground w-10 text-right">{score}/5</span>
+          <span className="text-sm font-medium text-foreground flex-1 text-left">{label}</span>
+          <span className={`text-lg font-bold ${scoreColor}`}>{score}/5</span>
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
-        <div className="mt-2 p-4 bg-muted rounded-lg border border-border space-y-3">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Evidence</p>
-            <p className="text-sm text-foreground leading-relaxed">{evidence}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Reasoning</p>
-            <p className="text-sm text-foreground leading-relaxed">{reasoning}</p>
+        <div className={`mx-2 mb-3 p-6 rounded-xl border border-border/50 ${scoreBg}`}>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 opacity-70">Evidence</p>
+              <p className="text-sm text-foreground leading-relaxed">{evidence}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 opacity-70">Reasoning</p>
+              <p className="text-sm text-foreground leading-relaxed">{reasoning}</p>
+            </div>
           </div>
         </div>
       </CollapsibleContent>
@@ -291,14 +339,14 @@ function DimensionScore({
 
 function parseTranscript(transcriptString: string): TranscriptMessage[] {
   if (!transcriptString) return []
-  
+
   const messages: TranscriptMessage[] = []
   const lines = transcriptString.split('\n')
-  
+
   for (const line of lines) {
     const trimmed = line.trim()
     if (!trimmed) continue
-    
+
     const match = trimmed.match(/^\[(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(user|assistant|AI|Candidate):\s*(.+)$/i)
     if (match) {
       const [, timestamp, role, text] = match
@@ -313,17 +361,20 @@ function parseTranscript(transcriptString: string): TranscriptMessage[] {
       }
     }
   }
-  
+
   return messages
 }
 
-function AIAssessmentPanel({ scorecard }: { scorecard: Scorecard }) {
-  const recColor = {
-    'Strong Hire': 'text-green-700 bg-green-100 border-green-300',
-    'Hire': 'text-green-600 bg-green-50 border-green-200',
-    'Maybe': 'text-yellow-700 bg-yellow-100 border-yellow-300',
-    'No Hire': 'text-red-700 bg-red-100 border-red-300'
-  }[scorecard.overallRecommendation] || 'text-zinc-600 bg-zinc-100 border-zinc-300'
+function HeroScorecard({ scorecard }: { scorecard: Scorecard }) {
+  const [activeDimension, setActiveDimension] = useState<number | null>(null)
+
+  const recConfig = recommendationConfig[scorecard.overallRecommendation] || {
+    bg: 'bg-zinc-500/20',
+    text: 'text-zinc-400',
+    glow: '',
+    icon: Minus
+  }
+  const RecIcon = recConfig.icon
 
   const dimensions = [
     { key: 'problemSolving', label: 'Problem Solving', data: scorecard.dimensions.problemSolving },
@@ -332,60 +383,142 @@ function AIAssessmentPanel({ scorecard }: { scorecard: Scorecard }) {
     { key: 'debugging', label: 'Debugging', data: scorecard.dimensions.debugging },
   ]
 
+  const radarData = dimensions.map(d => ({
+    label: d.label,
+    score: d.data.score,
+    maxScore: 5
+  }))
+
+  const handleDimensionClick = (index: number) => {
+    setActiveDimension(activeDimension === index ? null : index)
+  }
+
   return (
-    <Card className="bg-card border-border shadow-sm">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">AI Assessment</CardTitle>
-          <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${recColor}`}>
+    <motion.div
+      className="glass-card rounded-2xl p-6 md:p-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Header with recommendation badge */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">AI Assessment</h2>
+            <p className="text-sm text-muted-foreground">Performance Analysis</p>
+          </div>
+        </div>
+
+        <motion.div
+          className={`flex items-center gap-2 px-4 py-2 rounded-full ${recConfig.bg} ${recConfig.glow}`}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <RecIcon size={18} className={recConfig.text} />
+          <span className={`font-semibold ${recConfig.text}`}>
             {scorecard.overallRecommendation}
           </span>
+        </motion.div>
+      </div>
+
+      {/* Main content: Radar Chart + Summary */}
+      <div className="grid md:grid-cols-2 gap-8 mb-6">
+        {/* Radar Chart */}
+        <div className="flex justify-center items-center">
+          <RadarChart
+            dimensions={radarData}
+            size={280}
+            animated={true}
+            onDimensionClick={handleDimensionClick}
+            activeDimension={activeDimension}
+          />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <p className="text-sm text-muted-foreground leading-relaxed">{scorecard.summary}</p>
-        
-        <div className="space-y-3">
-          {dimensions.map(({ key, label, data }) => (
-            <DimensionScore
-              key={key}
-              label={label}
-              score={data.score}
-              evidence={data.evidence}
-              reasoning={data.reasoning}
-            />
-          ))}
+
+        {/* Summary and quick stats */}
+        <div className="flex flex-col justify-center">
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+            {scorecard.summary}
+          </p>
+
+          {/* Quick score indicators */}
+          <div className="grid grid-cols-2 gap-3">
+            {dimensions.map((dim, i) => {
+              const scoreColor = dim.data.score >= 4 ? 'text-emerald-400' : dim.data.score >= 3 ? 'text-yellow-400' : 'text-red-400'
+              const isActive = activeDimension === i
+              return (
+                <button
+                  key={dim.key}
+                  onClick={() => handleDimensionClick(i)}
+                  className={`text-left p-3 rounded-lg border transition-all ${isActive
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                    }`}
+                >
+                  <p className="text-xs text-muted-foreground mb-1">{dim.label}</p>
+                  <p className={`text-xl font-bold ${scoreColor}`}>{dim.data.score}/5</p>
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Expandable dimension details */}
+      <div className="border-t border-border pt-4">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 px-4">
+          Detailed Breakdown
+        </p>
+        {dimensions.map((dim, i) => (
+          <DimensionDetail
+            key={dim.key}
+            label={dim.label}
+            score={dim.data.score}
+            evidence={dim.data.evidence}
+            reasoning={dim.data.reasoning}
+            isActive={activeDimension === i}
+            onToggle={() => handleDimensionClick(i)}
+          />
+        ))}
+      </div>
+    </motion.div>
   )
 }
 
 function TranscriptCard({ transcript }: { transcript: string }) {
   const messages = parseTranscript(transcript)
   const messageCount = messages.length
-  
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Card className="bg-card border-border shadow-sm hover:bg-accent transition-colors cursor-pointer group">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors dark:bg-blue-500/20 dark:text-blue-400 dark:group-hover:bg-blue-500/30">
-                  <MessageSquare size={24} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="glass-card border-border hover:border-primary/50 transition-all cursor-pointer group">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30 transition-colors">
+                    <MessageSquare size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Interview Transcript</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {messageCount > 0 ? `${messageCount} messages` : 'No messages'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Interview Transcript</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {messageCount > 0 ? `${messageCount} messages` : 'No messages'}
-                  </p>
-                </div>
+                <ChevronRight size={20} className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
               </div>
-              <ChevronRight size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-lg bg-background border-border p-0 flex flex-col">
         <SheetHeader className="p-4 border-b border-border bg-card">
@@ -402,22 +535,19 @@ function TranscriptCard({ transcript }: { transcript: string }) {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                      msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-md dark:bg-blue-500'
-                        : 'bg-card text-foreground border border-border rounded-bl-md shadow-sm'
-                    }`}
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${msg.role === 'user'
+                      ? 'bg-blue-600 text-white rounded-br-md dark:bg-blue-500'
+                      : 'bg-card text-foreground border border-border rounded-bl-md shadow-sm'
+                      }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-medium ${
-                        msg.role === 'user' ? 'text-blue-200 dark:text-blue-100' : 'text-muted-foreground'
-                      }`}>
+                      <span className={`text-xs font-medium ${msg.role === 'user' ? 'text-blue-200 dark:text-blue-100' : 'text-muted-foreground'
+                        }`}>
                         {msg.role === 'user' ? 'Candidate' : 'AI Interviewer'}
                       </span>
                       {msg.timestamp && (
-                        <span className={`text-xs ${
-                          msg.role === 'user' ? 'text-blue-300 dark:text-blue-200' : 'text-muted-foreground'
-                        }`}>
+                        <span className={`text-xs ${msg.role === 'user' ? 'text-blue-300 dark:text-blue-200' : 'text-muted-foreground'
+                          }`}>
                           {msg.timestamp}
                         </span>
                       )}
@@ -438,88 +568,107 @@ function TestResultBadge({ results }: { results: Submission['result_json']['subm
   const passed = results.filter(r => r.status.id === 3).length
   const total = results.length
   const allPassed = passed === total
-  
+
   return (
-    <div className={`flex items-center gap-1.5 text-sm ${allPassed ? 'text-green-600' : 'text-red-600'}`}>
-      {allPassed ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+    <div className={`flex items-center gap-1.5 text-sm font-medium ${allPassed ? 'text-emerald-400' : 'text-red-400'}`}>
+      {allPassed ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
       <span>{passed}/{total} tests</span>
     </div>
   )
 }
 
-function SubmissionCard({ 
-  submission, 
-  index, 
+function SubmissionCard({
+  submission,
+  index,
   prevCode,
   aiComment
-}: { 
+}: {
   submission: Submission
   index: number
   prevCode: string | null
   aiComment?: string
 }) {
   const [expanded, setExpanded] = useState(index === 0)
-  
+
   const time = submission.timestamp !== null
     ? `T+${String(Math.floor(submission.timestamp / 60)).padStart(2, '0')}:${String(submission.timestamp % 60).padStart(2, '0')}`
     : new Date(submission.created_at).toLocaleTimeString()
-  
+
+  const passed = submission.result_json.submissions.filter(r => r.status.id === 3).length
+  const total = submission.result_json.submissions.length
+  const allPassed = passed === total
+
   return (
-    <Card className="bg-card border-border shadow-sm overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-accent transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <ChevronRight 
-            size={16} 
-            className={`text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
-          />
-          <span className="font-medium text-foreground">Submission #{index + 1}</span>
-          <span className="text-muted-foreground text-sm">{time}</span>
-        </div>
-        <TestResultBadge results={submission.result_json.submissions} />
-      </button>
-      
-      {expanded && (
-        <CardContent className="pt-3 border-t border-border">
-          {aiComment && (
-            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 dark:bg-blue-500/20 dark:border-blue-500/50 dark:text-blue-400">
-              <span className="font-medium">AI: </span>{aiComment}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1 * index }}
+    >
+      <Card className={`glass-card border-border overflow-hidden ${expanded ? 'ring-1 ring-primary/30' : ''}`}>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between p-4 hover:bg-accent/30 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${allPassed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+              }`}>
+              {index + 1}
             </div>
-          )}
-          
-          {prevCode ? (
-            <>
-              <p className="text-xs text-muted-foreground mb-2">Changes from previous submission:</p>
-              <DiffView oldCode={prevCode} newCode={submission.code} />
-            </>
-          ) : (
-            <>
-              <p className="text-xs text-muted-foreground mb-2">Initial submission:</p>
-              <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto text-foreground border border-border">
-                {submission.code}
-              </pre>
-            </>
-          )}
-          
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {submission.result_json.submissions.map((result, i) => (
-              <div 
-                key={i}
-                className={`text-xs p-2 rounded border ${
-                  result.status.id === 3 
-                    ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/50' 
-                    : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/50'
-                }`}
-              >
-                Test {i + 1}: {result.status.description}
-              </div>
-            ))}
+            <div className="text-left">
+              <span className="font-medium text-foreground">Submission #{index + 1}</span>
+              <span className="text-muted-foreground text-sm ml-2">{time}</span>
+            </div>
           </div>
-        </CardContent>
-      )}
-    </Card>
+          <div className="flex items-center gap-3">
+            <TestResultBadge results={submission.result_json.submissions} />
+            <ChevronRight
+              size={16}
+              className={`text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+            />
+          </div>
+        </button>
+
+        {expanded && (
+          <CardContent className="pt-0 pb-4 border-t border-border">
+            {aiComment && (
+              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-400">
+                <span className="font-medium">AI Feedback: </span>{aiComment}
+              </div>
+            )}
+
+            <div className="mt-4">
+              {prevCode ? (
+                <>
+                  <p className="text-xs text-muted-foreground mb-2">Changes from previous submission:</p>
+                  <DiffView oldCode={prevCode} newCode={submission.code} />
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground mb-2">Initial submission:</p>
+                  <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto text-foreground border border-border">
+                    {submission.code}
+                  </pre>
+                </>
+              )}
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {submission.result_json.submissions.map((result, i) => (
+                <div
+                  key={i}
+                  className={`text-xs p-2 rounded border ${result.status.id === 3
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                    : 'bg-red-500/10 text-red-400 border-red-500/30'
+                    }`}
+                >
+                  Test {i + 1}: {result.status.description}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
+      </Card>
+    </motion.div>
   )
 }
 
@@ -537,7 +686,7 @@ export default function ReportPage() {
     const fetchData = async () => {
       try {
         const supabase = createClient()
-        
+
         const [sessionRes, submissionsRes, userRes] = await Promise.all([
           supabase
             .from('sessions')
@@ -559,7 +708,6 @@ export default function ReportPage() {
         const sessionVisibility = sessionRes.data?.visibility || 'private'
         const ownsSession = currentUserId === sessionRes.data?.user_id
 
-        // Access control: private reports only visible to owner
         if (sessionVisibility === 'private' && !ownsSession) {
           setError('This report is private')
           setLoading(false)
@@ -583,7 +731,10 @@ export default function ReportPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading report...</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Loading report...</p>
+        </div>
       </div>
     )
   }
@@ -591,63 +742,101 @@ export default function ReportPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
+        <motion.div
+          className="text-center glass-card p-8 rounded-2xl"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
           <Lock className="mx-auto mb-4 text-muted-foreground" size={48} />
-          <p className="text-destructive font-medium">{error}</p>
+          <p className="text-destructive font-medium text-lg">{error}</p>
           <p className="text-muted-foreground text-sm mt-1">You don&apos;t have permission to view this report</p>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
   const scorecard = sessionData?.events?.scorecard
-  const totalPassed = submissions.reduce((acc, sub) => 
+  const totalPassed = submissions.reduce((acc, sub) =>
     acc + sub.result_json.submissions.filter(r => r.status.id === 3).length, 0
   )
-  const totalTests = submissions.reduce((acc, sub) => 
+  const totalTests = submissions.reduce((acc, sub) =>
     acc + sub.result_json.submissions.length, 0
   )
 
   return (
-    <div className="min-h-screen p-6 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen p-4 md:p-8 bg-background">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.header
+          className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Session Report</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              {submissions.length} submissions • {totalPassed}/{totalTests} total test runs passed
+            <h1 className="text-3xl font-bold text-foreground">Session Report</h1>
+            <p className="text-muted-foreground mt-1">
+              {submissions.length} submissions • {totalPassed}/{totalTests} tests passed
             </p>
           </div>
-          <PrivacyDropdown 
+          <PrivacyDropdown
             sessionId={sessionId}
             currentVisibility={visibility}
             onVisibilityChange={setVisibility}
             isOwner={isOwner}
           />
-        </div>
+        </motion.header>
 
-        <div className="hidden lg:flex gap-6">
-          <div className="w-[32%] shrink-0">
-            <div className="sticky top-6 space-y-6">
-              {scorecard ? (
-                <AIAssessmentPanel scorecard={scorecard} />
-              ) : (
-                <Card className="bg-card border-border shadow-sm">
-                  <CardContent className="p-6 text-center text-muted-foreground">
-                    No AI assessment available
-                  </CardContent>
-                </Card>
-              )}
-              
-              {sessionData?.transcript?.items && (
+        {/* Main Content */}
+        <div className="space-y-6">
+          {/* AI Assessment Hero */}
+          {scorecard ? (
+            <HeroScorecard scorecard={scorecard} />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card rounded-2xl p-8 text-center"
+            >
+              <Sparkles className="mx-auto mb-4 text-muted-foreground" size={40} />
+              <p className="text-muted-foreground">No AI assessment available for this session</p>
+            </motion.div>
+          )}
+
+          {/* Secondary Row: Transcript + Submissions */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Transcript Card */}
+            <div className="lg:col-span-1">
+              {sessionData?.transcript?.items ? (
                 <TranscriptCard transcript={sessionData.transcript.items} />
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <Card className="glass-card p-5">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-muted">
+                        <MessageSquare size={24} className="text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">Interview Transcript</h3>
+                        <p className="text-sm text-muted-foreground">No transcript available</p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
               )}
             </div>
-          </div>
 
-          <div className="flex-1">
-            <div>
+            {/* Submissions Timeline */}
+            <div className="lg:col-span-2">
+              {submissions.length > 0 ? (
                 <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4">
+                    Submission Timeline
+                  </p>
                   {submissions.map((submission, i) => {
                     const comment = scorecard?.submissionComments?.find(
                       (c) => c.submissionNumber === i + 1
@@ -663,59 +852,20 @@ export default function ReportPage() {
                     )
                   })}
                 </div>
-
-                {submissions.length === 0 && (
-                  <Card className="bg-card border-border shadow-sm">
-                    <CardContent className="p-6 text-center text-muted-foreground">
-                      No submissions found for this session.
-                    </CardContent>
-                  </Card>
-                )}
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="flex items-center gap-4 p-5 glass-card rounded-xl"
+                >
+                  <div className="p-3 rounded-xl bg-muted">
+                    <MessageSquare size={24} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No code submissions were made during this session.</p>
+                </motion.div>
+              )}
             </div>
-          </div>
-        </div>
-
-        <div className="lg:hidden space-y-6">
-          {scorecard ? (
-            <AIAssessmentPanel scorecard={scorecard} />
-          ) : (
-            <Card className="bg-card border-border shadow-sm">
-              <CardContent className="p-6 text-center text-muted-foreground">
-                No AI assessment available
-              </CardContent>
-            </Card>
-          )}
-
-          {sessionData?.transcript?.items && (
-            <TranscriptCard transcript={sessionData.transcript.items} />
-          )}
-
-          <div>
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Submission Timeline</h2>
-            <div className="space-y-3">
-              {submissions.map((submission, i) => {
-                const comment = scorecard?.submissionComments?.find(
-                  (c) => c.submissionNumber === i + 1
-                )?.comment
-                return (
-                  <SubmissionCard
-                    key={submission.id}
-                    submission={submission}
-                    index={i}
-                    prevCode={i > 0 ? submissions[i - 1].code : null}
-                    aiComment={comment}
-                  />
-                )
-              })}
-            </div>
-
-            {submissions.length === 0 && (
-              <Card className="bg-card border-border shadow-sm">
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  No submissions found for this session.
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>

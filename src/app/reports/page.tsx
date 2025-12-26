@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar"
 import { SessionsTable } from "@/components/sessions-table"
 import { createClient } from "@/lib/supabase/client"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { HeaderControls } from "@/components/header-controls"
 import { Spinner } from "@/components/ui/spinner"
 import { useQuery } from "@tanstack/react-query"
 import { fetchAllSessions } from "@/lib/queries"
@@ -89,7 +89,7 @@ export default function ReportsPage() {
             </Breadcrumb>
           </div>
           <div className="px-4">
-            <ThemeToggle />
+            <HeaderControls />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

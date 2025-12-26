@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { fetchProblems } from "@/lib/queries"
+import { fetchProblems, fetchUserCredits } from "@/lib/queries"
 import { nanoid } from "nanoid"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -22,21 +22,23 @@ import {
 } from "@/components/ui/sidebar"
 import { InterviewCard } from "@/components/interview-card"
 import { SessionsTable } from "@/components/sessions-table"
+import { InterviewCardSkeleton } from "@/components/skeletons"
 import { createClient } from "@/lib/supabase/client"
-import { ThemeToggle } from "@/components/theme-toggle"
-
-
+import { HeaderControls } from "@/components/header-controls"
+import { JoinSessionDialog } from "@/components/app/JoinSessionDialog"
 
 export default function Page() {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
-  
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false)
+  const [selectedProblem, setSelectedProblem] = useState<any>(null)
+
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (!user) {
         router.replace('/')
       } else {
@@ -44,7 +46,7 @@ export default function Page() {
         setIsChecking(false)
       }
     }
-    
+
     checkAuth()
   }, [router])
 
@@ -53,6 +55,27 @@ export default function Page() {
     queryFn: () => fetchProblems(),
     enabled: !!userId,
   })
+
+  const { data: credits } = useQuery({
+    queryKey: ["credits", userId],
+    queryFn: () => fetchUserCredits(userId!),
+    enabled: !!userId,
+  })
+
+  const handleJoinClick = (problem: any) => {
+    setSelectedProblem(problem)
+    setJoinDialogOpen(true)
+  }
+
+  const handleConfirmJoin = () => {
+    if (!selectedProblem) return
+
+    const sessionId = nanoid()
+    // Store session creation token to prevent direct URL access
+    sessionStorage.setItem(`session_token_${sessionId}`, Date.now().toString())
+    router.push(`/problems/${selectedProblem.question_uri}/${sessionId}`)
+    setJoinDialogOpen(false)
+  }
 
   if (isChecking) {
     return null
@@ -81,12 +104,14 @@ export default function Page() {
             </Breadcrumb>
           </div>
           <div className="px-4">
-            <ThemeToggle />
+            <HeaderControls />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            {isLoading && <p>Loading problems...</p>}
+            {isLoading && [...Array(6)].map((_, i) => (
+              <InterviewCardSkeleton key={i} />
+            ))}
             {error && <p>Error loading problems: {error.message}</p>}
             {problems?.map((problem: any) => (
               <InterviewCard
@@ -94,20 +119,23 @@ export default function Page() {
                 questionNumber={problem.question_number}
                 title={problem.title}
                 difficulty={problem.difficulty}
-                onClick={() => {
-                  const sessionId = nanoid()
-                  // Store session creation token to prevent direct URL access
-                  sessionStorage.setItem(`session_token_${sessionId}`, Date.now().toString())
-                  router.push(`/problems/${problem.question_uri}/${sessionId}`)
-                }}
+                onClick={() => handleJoinClick(problem)}
               />
             ))}
           </div>
-          <div className="rounded-xl border bg-card">
+          <div className="rounded-xl border bg-card flex-1 flex flex-col">
             <SessionsTable limit={5} />
           </div>
         </div>
       </SidebarInset>
+
+      <JoinSessionDialog
+        open={joinDialogOpen}
+        onOpenChange={setJoinDialogOpen}
+        onConfirm={handleConfirmJoin}
+        onCancel={() => setJoinDialogOpen(false)}
+        credits={credits ?? 0}
+      />
     </SidebarProvider>
   )
 }

@@ -30,8 +30,8 @@ export const fetchQuestionByUri = async (uri: string) => {
 export const fetchStarterCode = async (language: string, uri: string) => {
   const supabase = createClient()
   const { data, error } = await supabase
-  .from('starter_codes')
-  .select(`
+    .from('starter_codes')
+    .select(`
     code,
     main,
     imports,
@@ -40,9 +40,9 @@ export const fetchStarterCode = async (language: string, uri: string) => {
       question_uri
     )
   `)
-  .eq('language', language)
-  .eq('questions.question_uri', uri)
-  .maybeSingle() 
+    .eq('language', language)
+    .eq('questions.question_uri', uri)
+    .maybeSingle()
 
   if (error || !data) throw new Error('Starter code not found')
   return data
@@ -54,7 +54,7 @@ export const fetchProblems = async () => {
     .from('questions')
     .select('id, question_number, title, difficulty, summary, question_uri')
     .order('question_number', { ascending: true })
-  
+
   if (error) throw error
   return problems
 }
@@ -111,7 +111,19 @@ export const fetchAllSessions = async (userId: string) => {
     `)
     .eq('user_id', userId)
     .order('started_at', { ascending: false })
-  
+
   if (error) throw error
   return sessions
+}
+
+export const fetchUserCredits = async (userId: string) => {
+  const supabase = createClient()
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('credits')
+    .eq('id', userId)
+    .single()
+
+  if (error) throw error
+  return profile?.credits || 0
 }
