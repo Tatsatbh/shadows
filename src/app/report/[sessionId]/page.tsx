@@ -153,7 +153,7 @@ function VisibilityLabel({ visibility }: { visibility: Visibility }) {
   const Icon = config.icon
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${config.bg}`}>
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md w-fit ${config.bg}`}>
       <Icon size={14} className={config.color} />
       <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
     </div>
@@ -401,7 +401,7 @@ function HeroScorecard({ scorecard }: { scorecard: Scorecard }) {
       transition={{ duration: 0.6 }}
     >
       {/* Header with recommendation badge */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+      <div className="flex flex-row items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -413,7 +413,7 @@ function HeroScorecard({ scorecard }: { scorecard: Scorecard }) {
         </div>
 
         <motion.div
-          className={`flex items-center gap-2 px-4 py-2 rounded-full ${recConfig.bg} ${recConfig.glow}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full w-fit ${recConfig.bg} ${recConfig.glow}`}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -428,14 +428,25 @@ function HeroScorecard({ scorecard }: { scorecard: Scorecard }) {
       {/* Main content: Radar Chart + Summary */}
       <div className="grid md:grid-cols-2 gap-8 mb-6">
         {/* Radar Chart */}
-        <div className="flex justify-center items-center">
-          <RadarChart
-            dimensions={radarData}
-            size={280}
-            animated={true}
-            onDimensionClick={handleDimensionClick}
-            activeDimension={activeDimension}
-          />
+        <div className="flex justify-center items-center overflow-hidden pt-6 md:pt-0">
+          <div className="block md:hidden">
+            <RadarChart
+              dimensions={radarData}
+              size={220}
+              animated={true}
+              onDimensionClick={handleDimensionClick}
+              activeDimension={activeDimension}
+            />
+          </div>
+          <div className="hidden md:block">
+            <RadarChart
+              dimensions={radarData}
+              size={280}
+              animated={true}
+              onDimensionClick={handleDimensionClick}
+              activeDimension={activeDimension}
+            />
+          </div>
         </div>
 
         {/* Summary and quick stats */}
@@ -629,14 +640,14 @@ function SubmissionCard({
         </button>
 
         {expanded && (
-          <CardContent className="pt-0 pb-4 border-t border-border">
+          <CardContent className="pt-0 pb-4 border-t border-border overflow-hidden">
             {aiComment && (
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-400">
+              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-400 break-words">
                 <span className="font-medium">AI Feedback: </span>{aiComment}
               </div>
             )}
 
-            <div className="mt-4">
+            <div className="mt-4 overflow-x-auto">
               {prevCode ? (
                 <>
                   <p className="text-xs text-muted-foreground mb-2">Changes from previous submission:</p>
@@ -645,18 +656,18 @@ function SubmissionCard({
               ) : (
                 <>
                   <p className="text-xs text-muted-foreground mb-2">Initial submission:</p>
-                  <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto text-foreground border border-border">
+                  <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto text-foreground border border-border max-w-full">
                     {submission.code}
                   </pre>
                 </>
               )}
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {submission.result_json.submissions.map((result, i) => (
                 <div
                   key={i}
-                  className={`text-xs p-2 rounded border ${result.status.id === 3
+                  className={`text-xs p-2 rounded border truncate ${result.status.id === 3
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                     : 'bg-red-500/10 text-red-400 border-red-500/30'
                     }`}
@@ -764,7 +775,7 @@ export default function ReportPage() {
   )
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-background">
+    <div className="min-h-screen p-4 md:p-8 bg-background overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.header
