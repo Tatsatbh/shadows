@@ -12,9 +12,9 @@ import { useQuery } from "@tanstack/react-query"
 import { fetchAllSessions } from "@/lib/queries"
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
 import { SessionsTableSkeleton } from "@/components/skeletons"
-import { Check, Loader2, X } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowUpRight, Check, FileText, Loader2, X } from "lucide-react"
 
 type QuestionInfo = {
   question_number: number
@@ -88,14 +88,14 @@ export function SessionsTable({ limit }: SessionsTableProps) {
 
   const getDifficultyBadge = (difficulty: string) => {
     const difficultyColors = {
-      Easy: 'bg-green-100 text-green-800',
-      Medium: 'bg-yellow-100 text-yellow-800',
-      Hard: 'bg-red-100 text-red-800'
+      Easy: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
+      Medium: 'border-amber-500/20 bg-amber-500/10 text-amber-500',
+      Hard: 'border-rose-500/20 bg-rose-500/10 text-rose-500'
     }
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[difficulty as keyof typeof difficultyColors]}`}>
+      <Badge variant="outline" className={`rounded-[4px] text-[11px] ${difficultyColors[difficulty as keyof typeof difficultyColors]}`}>
         {difficulty}
-      </span>
+      </Badge>
     )
   }
 
@@ -115,14 +115,14 @@ export function SessionsTable({ limit }: SessionsTableProps) {
     const displayStatus = status.replace('_', ' ')
 
     return (
-      <span className={`pl-1 pr-2.5 py-1 rounded-full text-xs font-medium capitalize border ${statusColors[status] || 'bg-gray-500/10 text-gray-500 border-gray-500/20'} flex items-center gap-2 w-fit`}>
-        <div className={`p-1 rounded-full ${iconWrapperStyles[status] || 'bg-gray-500/20'} flex items-center justify-center`}>
+      <Badge variant="outline" className={`rounded-[4px] py-1 pl-1 pr-2.5 text-[11px] capitalize ${statusColors[status] || 'bg-gray-500/10 text-gray-500 border-gray-500/20'} flex items-center gap-2 w-fit`}>
+        <span className={`rounded-[3px] p-1 ${iconWrapperStyles[status] || 'bg-gray-500/20'} flex items-center justify-center`}>
           {status === 'completed' && <Check className="w-3 h-3" />}
           {status === 'in_progress' && <Loader2 className="w-3 h-3 animate-spin" />}
           {status === 'abandoned' && <X className="w-3 h-3" />}
-        </div>
+        </span>
         {displayStatus}
-      </span>
+      </Badge>
     )
   }
 
@@ -132,24 +132,12 @@ export function SessionsTable({ limit }: SessionsTableProps) {
 
   if (!sessions || sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 h-full">
-        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-          <svg
-            className="w-8 h-8 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-            />
-          </svg>
+      <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-16 text-center">
+        <div className="mb-4 grid h-12 w-12 place-items-center rounded-[6px] border border-blue-500/25 bg-blue-500/10 text-blue-500">
+          <FileText className="h-5 w-5" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">No sessions yet</h3>
-        <p className="text-sm text-muted-foreground text-center max-w-xs">
+        <h3 className="mb-1 text-base font-semibold text-foreground">No sessions yet</h3>
+        <p className="max-w-xs text-sm leading-6 text-muted-foreground">
           Pick a problem above and start your first coding interview session
         </p>
       </div>
@@ -157,15 +145,15 @@ export function SessionsTable({ limit }: SessionsTableProps) {
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Difficulty</TableHead>
-            <TableHead>Problem</TableHead>
-            <TableHead className="hidden sm:table-cell">Status</TableHead>
-            <TableHead>Started</TableHead>
-            <TableHead className="text-right hidden md:table-cell">Duration</TableHead>
+        <TableHeader className="bg-muted/25 dark:bg-white/[0.02]">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="h-11 px-4 text-[11px] uppercase">Difficulty</TableHead>
+            <TableHead className="h-11 px-4 text-[11px] uppercase">Problem</TableHead>
+            <TableHead className="hidden h-11 px-4 text-[11px] uppercase sm:table-cell">Status</TableHead>
+            <TableHead className="h-11 px-4 text-[11px] uppercase">Started</TableHead>
+            <TableHead className="hidden h-11 px-4 text-right text-[11px] uppercase md:table-cell">Duration</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -174,7 +162,7 @@ export function SessionsTable({ limit }: SessionsTableProps) {
             return (
               <TableRow
                 key={session.id}
-                className={isDisabled ? 'opacity-50 cursor-not-allowed h-16' : 'cursor-pointer hover:bg-muted/50 h-16'}
+                className={isDisabled ? 'h-16 cursor-not-allowed opacity-55' : 'group h-16 cursor-pointer hover:bg-blue-500/[0.045]'}
                 onClick={() => {
                   if (isDisabled) return
                   if (session.status === 'completed') {
@@ -182,19 +170,22 @@ export function SessionsTable({ limit }: SessionsTableProps) {
                   }
                 }}
               >
-                <TableCell className="py-4">
+                <TableCell className="px-4 py-4">
                   {session.questions?.difficulty && getDifficultyBadge(session.questions.difficulty)}
                 </TableCell>
-                <TableCell className="py-4">
-                  <div className="font-medium">
-                    {session.questions?.question_number}. {session.questions?.title}
+                <TableCell className="px-4 py-4">
+                  <div className="flex items-center gap-2 font-medium">
+                    <span className="line-clamp-1">
+                      {session.questions?.question_number}. {session.questions?.title}
+                    </span>
+                    {!isDisabled && <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />}
                   </div>
                 </TableCell>
-                <TableCell className="py-4 hidden sm:table-cell">
+                <TableCell className="hidden px-4 py-4 sm:table-cell">
                   {getStatusBadge(session.status)}
                 </TableCell>
-                <TableCell className="py-4">{formatDate(session.started_at)}</TableCell>
-                <TableCell className="text-right py-4 hidden md:table-cell">
+                <TableCell className="px-4 py-4 text-muted-foreground">{formatDate(session.started_at)}</TableCell>
+                <TableCell className="hidden px-4 py-4 text-right font-opencode text-muted-foreground md:table-cell">
                   {getDuration(session.started_at, session.ended_at)}
                 </TableCell>
               </TableRow>
