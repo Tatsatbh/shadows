@@ -18,29 +18,18 @@ interface SignInDialogProps {
   children: React.ReactNode
 }
 
-type AuthMode = 'signin' | 'signup'
-
 export function SignInDialog({ children }: SignInDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
   const supabase = createClient()
 
   const resetForm = () => {
     setEmail('')
     setPassword('')
     setError(null)
-    setMessage(null)
-  }
-
-  const handleModeSwitch = (newMode: AuthMode) => {
-    setMode(newMode)
-    setError(null)
-    setMessage(null)
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -63,34 +52,10 @@ export function SignInDialog({ children }: SignInDialogProps) {
     window.location.href = '/dashboard'
   }
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setIsLoading(false)
-      return
-    }
-
-    setMessage('Check your email for a confirmation link!')
-    setIsLoading(false)
-  }
-
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
     if (!isOpen) {
       resetForm()
-      setMode('signin')
     }
   }
 
@@ -101,16 +66,12 @@ export function SignInDialog({ children }: SignInDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {mode === 'signin' ? 'Sign in to Shadows' : 'Create an account'}
-          </DialogTitle>
+          <DialogTitle>Sign in to Shadows</DialogTitle>
           <DialogDescription>
-            {mode === 'signin'
-              ? 'Enter your email and password to continue'
-              : 'Enter your email and password to get started'}
+            Enter your email and password to continue. New access is waitlist-only for now.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="flex flex-col gap-4 mt-4">
+        <form onSubmit={handleSignIn} className="flex flex-col gap-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -140,43 +101,12 @@ export function SignInDialog({ children }: SignInDialogProps) {
           {error && (
             <p className="text-sm text-red-500">{error}</p>
           )}
-          
-          {message && (
-            <p className="text-sm text-green-500">{message}</p>
-          )}
-
           <Button type="submit" className="w-full h-11" disabled={isLoading}>
-            {isLoading
-              ? 'Loading...'
-              : mode === 'signin'
-              ? 'Sign In'
-              : 'Sign Up'}
+            {isLoading ? 'Loading...' : 'Sign In'}
           </Button>
 
           <p className="text-sm text-center text-muted-foreground">
-            {mode === 'signin' ? (
-              <>
-                Don&apos;t have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => handleModeSwitch('signup')}
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  Sign up
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => handleModeSwitch('signin')}
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  Sign in
-                </button>
-              </>
-            )}
+            Need access? Join the waitlist from the homepage.
           </p>
         </form>
       </DialogContent>
