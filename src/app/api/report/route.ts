@@ -18,7 +18,37 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createClient();
-  
+
+  // This route grades a session with a paid model and writes the result back.
+  // It previously ran for anonymous callers on any sessionId, which both billed
+  // this account on demand and returned another user's submitted code in the
+  // response. Require a signed-in user who owns the session.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: ownedSession, error: ownedSessionError } = await supabase
+    .from('sessions')
+    .select('id')
+    .eq('id', sessionId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (ownedSessionError) {
+    console.error('Failed to verify session ownership:', ownedSessionError);
+    return NextResponse.json({ error: 'Failed to verify session' }, { status: 500 });
+  }
+
+  if (!ownedSession) {
+    // Same response whether the session is absent or owned by someone else, so
+    // this cannot be used to probe for valid session ids.
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   const { data: question, error: questionError } = await supabase
     .from('questions')
     .select('id, title, description_md, difficulty')
@@ -188,8 +218,14 @@ Return your response as a JSON object with this structure:
     })
     .eq('id', sessionId);
 
+  // A failed write used to fall through to success: true, so the client showed a
+  // scorecard that was never persisted and was lost on reload.
   if (updateError) {
     console.error('Failed to update session:', updateError);
+    return NextResponse.json(
+      { error: 'Failed to save report', details: updateError.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({

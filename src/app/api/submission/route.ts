@@ -23,6 +23,19 @@ export async function POST(request: Request) {
         }
 
         const supabase = await createClient()
+
+        // Executing code costs Judge0 quota on the owner's paid plan, so the
+        // caller must be signed in. (RLS on test_cases already made anonymous
+        // calls fail with a confusing 404; this rejects them honestly and
+        // before any upstream work.)
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { data: question, error: questionError } = await supabase
             .from('questions')
             .select('id')
@@ -120,7 +133,27 @@ export async function GET(request: Request) {
             
             if (allDone) {
                 const { data: { user } } = await supabase.auth.getUser()
-                
+
+                // session_id and code arrive as query parameters, so without
+                // this check any caller could attach a submission row to
+                // someone else's session. Only persist into a session the
+                // caller actually owns.
+                if (!user) {
+                    return Response.json(judgeResponse)
+                }
+
+                const { data: ownedSession } = await supabase
+                    .from('sessions')
+                    .select('id')
+                    .eq('id', sessionId)
+                    .eq('user_id', user.id)
+                    .maybeSingle()
+
+                if (!ownedSession) {
+                    console.warn('Refusing to persist submission for a session the caller does not own')
+                    return Response.json(judgeResponse)
+                }
+
                 const MAX_ERROR_LENGTH = 500
                 const decodedSubmissions = judgeResponse.submissions.map((sub: any) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
