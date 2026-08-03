@@ -284,6 +284,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      question_test_case_counts: {
+        Args: { p_question_uri: string }
+        Returns: { total_count: number; hidden_count: number }[]
+      }
       start_session: {
         Args: { question_id: string; session_id: string; user_id: string }
         Returns: undefined

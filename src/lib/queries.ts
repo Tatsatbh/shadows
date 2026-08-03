@@ -69,28 +69,43 @@ export const fetchTestCasesMetadata = async (questionUri: string) => {
 
   if (questionError) throw new Error(questionError.message)
 
-  const { data: allTestCases, error: allError } = await supabase
+  // RLS now restricts this table to hidden = false for clients, so the hidden
+  // inputs and expected outputs never reach the browser at all. Filtering them
+  // out here (as this used to) only hid them from the UI, not from anyone
+  // reading the REST API with the anon key.
+  const { data: visible, error: visibleError } = await supabase
     .from('test_cases')
-    .select('id, input, expected_output, hidden')
+    .select('id, input, expected_output')
     .eq('question_id', question.id)
     .order('created_at', { ascending: true })
 
-  if (allError) throw new Error(allError.message)
+  if (visibleError) throw new Error(visibleError.message)
 
-  const visibleTestCases = (allTestCases || []).filter(tc => !tc.hidden)
-  const hiddenTestCases = (allTestCases || []).filter(tc => tc.hidden)
+  // The panel still renders a lock placeholder per hidden case, so it needs the
+  // counts without the contents. This RPC is SECURITY DEFINER and returns only
+  // aggregates.
+  const { data: counts, error: countsError } = await supabase
+    .rpc('question_test_case_counts', { p_question_uri: questionUri })
+    .single()
+
+  if (countsError) throw new Error(countsError.message)
+
+  const totalCount = counts?.total_count ?? visible?.length ?? 0
+  const hiddenCount = counts?.hidden_count ?? 0
 
   return {
-    visibleTestCases: visibleTestCases.map(tc => ({
+    visibleTestCases: (visible || []).map(tc => ({
       id: tc.id,
       input: tc.input,
       expected_output: tc.expected_output
     })),
-    hiddenTestCases: hiddenTestCases.map(tc => ({
-      id: tc.id,
+    // Placeholder ids: the rows are not readable, and the panel only needs a
+    // stable key per locked row.
+    hiddenTestCases: Array.from({ length: hiddenCount }, (_, i) => ({
+      id: `hidden-${i}`,
     })),
-    totalCount: allTestCases?.length || 0,
-    hiddenCount: hiddenTestCases.length
+    totalCount,
+    hiddenCount
   }
 }
 

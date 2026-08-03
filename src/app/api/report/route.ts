@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabaseClient';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -62,7 +63,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { data: testCases, error: testCasesError } = await supabase
+  // Service role: hidden cases are not client-readable, but grading needs them.
+  // Their inputs are masked to '[Hidden]' before anything reaches the model.
+  const { data: testCases, error: testCasesError } = await supabaseAdmin()
     .from('test_cases')
     .select('id, input, expected_output, hidden')
     .eq('question_id', question.id)

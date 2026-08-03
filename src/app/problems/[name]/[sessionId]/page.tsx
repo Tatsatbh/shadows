@@ -70,13 +70,15 @@ function EditorWithRealtime() {
   const testCaseMetadataForStore = useMemo(() => {
     if (!testCasesMetadata) return []
     const visible = testCasesMetadata.visibleTestCases.map((tc) => ({
+      id: tc.id,
       input: tc.input,
-      expectedOutput: tc.expected_output,
+      expected_output: tc.expected_output,
       hidden: false,
     }))
-    const hidden = testCasesMetadata.hiddenTestCases.map(() => ({
+    const hidden = testCasesMetadata.hiddenTestCases.map((tc) => ({
+      id: tc.id,
       input: "[Hidden]",
-      expectedOutput: "[Hidden]",
+      expected_output: "[Hidden]",
       hidden: true,
     }))
     return [...visible, ...hidden]

@@ -18,11 +18,10 @@ export interface TestCaseResult {
   stderr?: string
 }
 
-export interface TestCaseMetadata {
-  input: string
-  expectedOutput: string
-  hidden: boolean
-}
+// Re-exported from the shared module so the panel and the agent store stop
+// declaring two different shapes under one name.
+export type { TestCaseMetadata } from "@/lib/db-types"
+import type { TestCaseMetadata } from "@/lib/db-types"
 
 export interface LatestSubmissionResult {
   timestamp: number
@@ -73,7 +72,7 @@ export const useSubmissionStore = create<SubmissionStore>((set, get) => ({
       } else {
         output += `\n${statusEmoji} Test ${idx + 1}: ${result.status}`
         output += `\n   Input: ${tc?.input || "N/A"}`
-        output += `\n   Expected: ${tc?.expectedOutput || "N/A"}`
+        output += `\n   Expected: ${tc?.expected_output || "N/A"}`
         if (result.status === "failed" && result.actualOutput) {
           output += `\n   Actual: ${result.actualOutput}`
         }

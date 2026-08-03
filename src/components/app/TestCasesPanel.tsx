@@ -5,11 +5,10 @@ import { TestCaseBadge } from "@/components/ui/testcase-badge"
 import { Terminal } from "lucide-react"
 import type { TestCaseResult } from "@/hooks/useCodeSubmission"
 
-export interface TestCaseMetadata {
-  id: string
-  input: string
-  expected_output: string
-}
+// Shared with the agent store, which previously declared a different shape
+// under the same name.
+import type { TestCaseMetadata } from "@/lib/db-types"
+export type { TestCaseMetadata }
 
 export interface HiddenTestCaseMetadata {
   id: string

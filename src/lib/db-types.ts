@@ -29,7 +29,11 @@ export interface TestCaseMetadata {
   id: string
   input: string
   expected_output: string
-  hidden: boolean
+  /**
+   * Optional because the results panel is only ever handed visible cases, while
+   * the agent store holds both and needs to know which is which.
+   */
+  hidden?: boolean
 }
 
 /**

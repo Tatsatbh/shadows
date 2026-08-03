@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabaseClient'
 
 interface SubmissionRequest {
     judgeId: number
@@ -46,7 +47,10 @@ export async function POST(request: Request) {
             return Response.json({ error: "Question not found" }, { status: 404 })
         }
 
-        const { data: testCases, error: testCasesError } = await supabase
+        // Service role: RLS hides `hidden` rows from clients, but the judge has
+        // to run all of them. Auth and question resolution above still go
+        // through the caller's own session.
+        const { data: testCases, error: testCasesError } = await supabaseAdmin()
             .from('test_cases')
             .select('input, expected_output, hidden')
             .eq('question_id', question.id)
