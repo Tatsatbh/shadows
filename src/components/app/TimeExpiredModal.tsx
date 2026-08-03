@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AlertCircle } from "lucide-react"
 import {
   Dialog,
@@ -18,13 +18,23 @@ interface TimeExpiredModalProps {
 export default function TimeExpiredModal({ isOpen, onAutoSubmit }: TimeExpiredModalProps) {
   const [countdown, setCountdown] = useState(3)
 
+  // Auto-submit must fire exactly once per opening of the modal. The effect
+  // re-runs whenever onAutoSubmit changes identity, and while countdown is at 0
+  // that meant submitting again on every such change — so a failing report
+  // request could be retried in a tight loop, each attempt costing a grading
+  // call.
+  const hasSubmittedRef = useRef(false)
+
   useEffect(() => {
     if (!isOpen) {
       setCountdown(3)
+      hasSubmittedRef.current = false
       return
     }
 
     if (countdown <= 0) {
+      if (hasSubmittedRef.current) return
+      hasSubmittedRef.current = true
       onAutoSubmit()
       return
     }

@@ -63,9 +63,15 @@ export default function ReportsPage() {
       const hasInProgress = query.state.data?.some(
         (session: any) => session.status === "in_progress"
       )
-      // Poll every 2 seconds if there are in-progress sessions, otherwise don't poll
-      return hasInProgress ? 2000 : false
+      // Each poll refetches every session row plus its joined question, so the
+      // cost grows with a user's history. A session that never leaves
+      // in_progress (an abandon beacon that failed to send, say) polls for as
+      // long as the page is open, so this runs at 5s rather than 2s — still
+      // prompt for a status flip, at 60% fewer queries.
+      return hasInProgress ? 5000 : false
     },
+    // Don't keep polling a tab nobody is looking at.
+    refetchIntervalInBackground: false,
   })
 
   const hasInProgressSessions = sessions?.some(

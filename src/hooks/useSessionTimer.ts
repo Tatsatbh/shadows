@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   calculateRemainingSeconds,
   formatTime,
@@ -31,8 +31,14 @@ export function useSessionTimer({
   durationMinutes = 30,
   onTimeExpired,
 }: UseSessionTimerOptions): UseSessionTimerReturn {
-  const startDate = typeof startedAt === 'string' ? new Date(startedAt) : startedAt
-  
+  // Memoised on a primitive. Previously this built a new Date on every render,
+  // so every effect keyed on it re-ran continuously: the 1s interval below was
+  // torn down and recreated on each render, and when renders arrive faster than
+  // once a second — typing in the editor, transcript deltas — it never survived
+  // long enough to fire and the countdown appeared frozen.
+  const startedAtMs = typeof startedAt === 'string' ? Date.parse(startedAt) : startedAt.getTime()
+  const startDate = useMemo(() => new Date(startedAtMs), [startedAtMs])
+
   const [remainingSeconds, setRemainingSeconds] = useState(() =>
     calculateRemainingSeconds(startDate, durationMinutes)
   )

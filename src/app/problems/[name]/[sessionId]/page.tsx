@@ -17,6 +17,7 @@ import QuestionBar from "@/components/app/QuestionBar"
 import CommandBar from "@/components/app/CommandBar"
 import { useParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { fetchStarterCode, fetchTestCasesMetadata } from "@/lib/queries"
 
 // Extracted hooks and components
@@ -182,12 +183,22 @@ function EditorWithRealtime() {
 
   // Check mic permission on mount
   useEffect(() => {
+    let cancelled = false
     navigator.mediaDevices
       .getUserMedia({ audio: true })
-      .then(() => {})
-      .catch(() => {
-        setMicStatus("RESTRICTED")
+      .then((stream) => {
+        // This is only a permission probe. Without stopping the tracks the
+        // microphone stays open for the whole interview — the browser keeps
+        // showing the recording indicator — on top of the separate stream the
+        // realtime SDK opens for the actual conversation.
+        stream.getTracks().forEach((track) => track.stop())
       })
+      .catch(() => {
+        if (!cancelled) setMicStatus("RESTRICTED")
+      })
+    return () => {
+      cancelled = true
+    }
   }, [setMicStatus])
 
   // Audio element for realtime SDK
@@ -213,6 +224,22 @@ function EditorWithRealtime() {
     () => createInterviewerScenario(questionText),
     [questionText]
   )
+
+  // The connect effect must not depend on scenarioAgents directly. questionText
+  // starts empty and fills in once the question loads, which rebuilt the agents
+  // and tore down / re-established the whole WebRTC session — two connections
+  // per interview, with the opening exchange happening against an empty problem
+  // statement. Read the agents through a ref instead, gate the connection on the
+  // question actually being present, and push later changes with session.update.
+  const scenarioAgentsRef = useRef(scenarioAgents)
+  useEffect(() => {
+    scenarioAgentsRef.current = scenarioAgents
+  }, [scenarioAgents])
+
+  const hasQuestion = questionText.trim().length > 0
+
+  // Bumped to retry a failed connection without remounting the page.
+  const [connectAttempt, setConnectAttempt] = useState(0)
 
   // Refs for stable callbacks
   const isPTTActiveRef = useRef(isPTTActive)
@@ -246,6 +273,9 @@ function EditorWithRealtime() {
   // Connect to realtime session
   useEffect(() => {
     if (!sdkAudioElement) return
+    // Don't open a session until the problem statement exists, or the
+    // interviewer opens the conversation knowing nothing about the question.
+    if (!hasQuestion) return
 
     let cancelled = false
 
@@ -273,7 +303,7 @@ function EditorWithRealtime() {
 
         await connect({
           getEphemeralKey: async () => key,
-          initialAgents: scenarioAgents,
+          initialAgents: scenarioAgentsRef.current,
           audioElement: sdkAudioElement,
           outputGuardrails: [guardrail],
           extraContext: { addTranscriptBreadcrumb: safeAddTranscriptBreadcrumb },
@@ -296,6 +326,17 @@ function EditorWithRealtime() {
         if (cancelled) return
         console.error("Realtime connect failed:", err)
         setSessionStatus("DISCONNECTED")
+        // A failed connection used to be entirely silent: no error, no retry,
+        // and the interview timer carried on counting down against an
+        // interviewer that was never there.
+        toast.error("Couldn't reach the interviewer", {
+          description: "Your code and timer are unaffected. Retry to start the conversation.",
+          duration: Infinity,
+          action: {
+            label: "Retry",
+            onClick: () => setConnectAttempt((n) => n + 1),
+          },
+        })
       }
     }
 
@@ -304,7 +345,24 @@ function EditorWithRealtime() {
       cancelled = true
       disconnect()
     }
-  }, [connect, disconnect, guardrail, scenarioAgents, sdkAudioElement, sendEvent, safeAddTranscriptBreadcrumb])
+  }, [connect, disconnect, guardrail, hasQuestion, connectAttempt, sdkAudioElement, sendEvent, safeAddTranscriptBreadcrumb])
+
+  // The problem statement can change after the session is live (or be edited by
+  // a future flow). session.update accepts `instructions` mid-session and the
+  // server acknowledges with session.updated, so the prompt can be replaced
+  // without dropping the WebRTC connection. Only `voice` and `model` are
+  // immutable once a session exists.
+  const sentInstructionsRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (sessionStatus !== "CONNECTED" || !hasQuestion) return
+
+    const instructions = scenarioAgents[0]?.instructions
+    if (typeof instructions !== "string") return
+    if (sentInstructionsRef.current === instructions) return
+
+    sentInstructionsRef.current = instructions
+    sendEvent({ type: "session.update", session: { instructions } })
+  }, [sessionStatus, hasQuestion, scenarioAgents, sendEvent])
 
   // Update turn detection when PTT changes
   useEffect(() => {
@@ -321,7 +379,10 @@ function EditorWithRealtime() {
     if (micStatus === "ENABLED") {
       navigator.mediaDevices
         .getUserMedia({ audio: true })
-        .then(() => {
+        .then((stream) => {
+          // Permission probe again — release it immediately, the SDK owns the
+          // stream that actually carries audio.
+          stream.getTracks().forEach((track) => track.stop())
           setMicStatus("ENABLED")
           mute(false)
         })
