@@ -36,6 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { asDifficulty, type Difficulty } from "@/lib/db-types"
 import { Button } from "@/components/ui/button"
 
 type Problem = {
@@ -43,7 +44,7 @@ type Problem = {
   question_number: number
   question_uri: string
   title: string
-  difficulty: "Easy" | "Medium" | "Hard"
+  difficulty: Difficulty
   summary: string | null
 }
 
@@ -90,7 +91,13 @@ export default function Page() {
   })
 
   const problemList = useMemo<Problem[]>(() => {
-    return Array.isArray(problems) ? problems : []
+    if (!Array.isArray(problems)) return []
+    // difficulty is CHECK-constrained text, which the generated types widen to
+    // string; narrow it once here rather than at every consumer.
+    return problems.map((problem) => ({
+      ...problem,
+      difficulty: asDifficulty(problem.difficulty),
+    }))
   }, [problems])
 
   const filteredProblemList = useMemo(() => {

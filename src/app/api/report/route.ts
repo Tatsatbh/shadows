@@ -105,8 +105,13 @@ export async function POST(req: NextRequest) {
 
   const subs = submissions || [];
   const submissionTimeline = subs.map((sub, i) => {
-    const testsPassed = sub.result_json?.submissions?.filter((r: any) => r.status?.id === 3).length || 0;
-    const totalTestsInSub = sub.result_json?.submissions?.length || 0;
+    // result_json is jsonb, so the generated types give back Json. Narrow it to
+    // the Judge0 batch shape this code actually expects.
+    const resultJson = sub.result_json as {
+      submissions?: Array<{ status?: { id?: number } }>
+    } | null;
+    const testsPassed = resultJson?.submissions?.filter((r) => r.status?.id === 3).length || 0;
+    const totalTestsInSub = resultJson?.submissions?.length || 0;
     return {
       submissionNumber: i + 1,
       timestamp: sub.created_at,

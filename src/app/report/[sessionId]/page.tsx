@@ -61,7 +61,7 @@ interface Submission {
   id: string
   code: string
   language: string
-  created_at: string
+  created_at: string | null
   timestamp: number | null
   result_json: {
     submissions: Array<{
@@ -106,7 +106,7 @@ interface SessionData {
   visibility?: 'private' | 'public' | 'unlisted'
 }
 
-type Visibility = 'private' | 'public' | 'unlisted'
+import { asVisibility, type Visibility } from '@/lib/db-types'
 
 const visibilityConfig = {
   private: {
@@ -792,7 +792,7 @@ function SubmissionCard({
 
   const time = submission.timestamp !== null
     ? `T+${String(Math.floor(submission.timestamp / 60)).padStart(2, '0')}:${String(submission.timestamp % 60).padStart(2, '0')}`
-    : new Date(submission.created_at).toLocaleTimeString()
+    : submission.created_at ? new Date(submission.created_at).toLocaleTimeString() : '--'
 
   const passed = submission.result_json.submissions.filter(r => r.status.id === 3).length
   const total = submission.result_json.submissions.length
@@ -891,7 +891,7 @@ function SubmissionTimelineDrawer({
   const latestLabel = latestSubmission
     ? latestSubmission.timestamp !== null
       ? `T+${String(Math.floor(latestSubmission.timestamp / 60)).padStart(2, '0')}:${String(latestSubmission.timestamp % 60).padStart(2, '0')}`
-      : new Date(latestSubmission.created_at).toLocaleTimeString()
+      : latestSubmission.created_at ? new Date(latestSubmission.created_at).toLocaleTimeString() : '--'
     : "No attempts"
 
   return (
@@ -1036,7 +1036,7 @@ export default function ReportPage() {
         if (submissionsRes.error) throw submissionsRes.error
 
         const currentUserId = userRes.data?.user?.id
-        const sessionVisibility = sessionRes.data?.visibility || 'private'
+        const sessionVisibility = asVisibility(sessionRes.data?.visibility)
         const ownsSession = currentUserId === sessionRes.data?.user_id
 
         if (sessionVisibility === 'private' && !ownsSession) {
@@ -1045,8 +1045,20 @@ export default function ReportPage() {
           return
         }
 
-        setSessionData(sessionRes.data)
-        setSubmissions(submissionsRes.data || [])
+        // transcript/events/result_json are jsonb, so the generated types hand
+        // back Json. Narrow just those fields; the rest of each row stays checked.
+        setSessionData({
+          ...sessionRes.data,
+          transcript: sessionRes.data.transcript as SessionData['transcript'],
+          events: sessionRes.data.events as SessionData['events'],
+          visibility: sessionVisibility,
+        })
+        setSubmissions(
+          (submissionsRes.data || []).map((row) => ({
+            ...row,
+            result_json: row.result_json as Submission['result_json'],
+          }))
+        )
         setVisibility(sessionVisibility)
         setIsOwner(ownsSession)
       } catch (err) {

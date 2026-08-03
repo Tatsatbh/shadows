@@ -13,8 +13,9 @@ export interface TestCaseResult {
 
 export interface StarterCode {
   code: string
-  imports?: string
-  main?: string
+  // Nullable in the schema, and the assembly below already drops falsy parts.
+  imports?: string | null
+  main?: string | null
 }
 
 export interface UseCodeSubmissionOptions {

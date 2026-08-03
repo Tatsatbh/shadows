@@ -15,6 +15,7 @@ import { useEffect, useState, useMemo } from "react"
 import { SessionsTableSkeleton } from "@/components/skeletons"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpRight, Check, FileText, Loader2, X } from "lucide-react"
+import { asSessionStatus } from "@/lib/db-types"
 
 type QuestionInfo = {
   question_number: number
@@ -60,6 +61,7 @@ export function SessionsTable({ limit }: SessionsTableProps) {
     if (!allSessions) return []
     const normalized = allSessions.map((session): Session => ({
       ...session,
+      status: asSessionStatus(session.status),
       questions: Array.isArray(session.questions)
         ? session.questions[0] ?? null
         : session.questions
