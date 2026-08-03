@@ -39,6 +39,13 @@ export interface LatestSubmissionResult {
 type SubmissionStore = {
   latestSubmission: LatestSubmissionResult | null
   setLatestSubmission: (submission: LatestSubmissionResult | null) => void
+  /**
+   * Clear results between interviews. This store lives at module scope, so
+   * without an explicit reset the previous question's results survive client
+   * navigation and getTestResultsForAgent() reports them to the voice agent as
+   * if they belonged to the current problem.
+   */
+  resetSubmission: () => void
   // Agent tool: get formatted test results for LLM consumption
   getTestResultsForAgent: () => string
 }
@@ -46,6 +53,7 @@ type SubmissionStore = {
 export const useSubmissionStore = create<SubmissionStore>((set, get) => ({
   latestSubmission: null,
   setLatestSubmission: (submission) => set({ latestSubmission: submission }),
+  resetSubmission: () => set({ latestSubmission: null }),
   getTestResultsForAgent: () => {
     const { latestSubmission } = get()
     if (!latestSubmission) {

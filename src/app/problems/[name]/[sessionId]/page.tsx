@@ -89,9 +89,11 @@ function EditorWithRealtime() {
     testCaseMetadata: testCaseMetadataForStore,
   })
 
-  // Starter code query
+  // Starter code query. The key must include questionUri: keyed on language
+  // alone, every question shared one cache entry, so opening a second question
+  // in the same session served the first question's starter code.
   const { data: starterCode } = useQuery({
-    queryKey: ["language", language],
+    queryKey: ["starter-code", questionUri, language],
     queryFn: () => fetchStarterCode(language, questionUri),
     enabled: sessionValidated,
   })
