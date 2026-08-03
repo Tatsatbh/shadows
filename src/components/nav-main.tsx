@@ -49,10 +49,10 @@ export function NavMain({
                 tooltip={item.title}
                 isActive={item.isActive}
                 className={cn(
-                  "relative h-10 rounded-[6px] px-3 text-[15px] text-zinc-300 transition-colors hover:bg-white/[0.045] hover:text-white",
-                  "data-[active=true]:bg-white/[0.06] data-[active=true]:font-medium data-[active=true]:text-white",
+                  "relative h-10 rounded-[6px] px-3 text-[15px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-zinc-300 dark:hover:bg-white/[0.045] dark:hover:text-white",
+                  "data-[active=true]:bg-muted/50 data-[active=true]:font-medium data-[active=true]:text-foreground dark:data-[active=true]:bg-white/[0.06] dark:data-[active=true]:text-white",
                   "before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-transparent",
-                  item.isActive && "border border-white/10 bg-white/[0.06] text-white before:bg-blue-500"
+                  item.isActive && "border border-border/50 bg-muted/50 text-foreground before:bg-blue-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
                 )}
               >
                 <Link href={item.url}>

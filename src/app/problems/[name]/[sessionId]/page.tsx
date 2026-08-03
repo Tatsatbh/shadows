@@ -343,14 +343,17 @@ function EditorWithRealtime() {
   // Loading state
   if (!sessionValidated) {
     return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="text-muted-foreground">Loading session...</div>
+      <div className="h-screen w-full flex items-center justify-center bg-background dark:bg-[#020305]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-white" />
+          <span className="text-sm text-muted-foreground font-mono">Loading session…</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="h-screen w-full flex flex-col">
+    <div className="h-screen w-full flex flex-col bg-background dark:bg-[#020305] text-foreground">
       <LeaveWarningDialog
         open={showLeaveWarning}
         onOpenChange={setShowLeaveWarning}
@@ -365,7 +368,7 @@ function EditorWithRealtime() {
         onTimeExpired={handleAutoSubmit}
         onHangUp={disableLeaveWarning}
       />
-      <ResizablePanelGroup direction="horizontal" className="w-full h-screen rounded-lg border md:min-w-[450px]">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 md:min-w-[450px]">
         <ResizablePanel defaultSize={40}>
           <div className="flex h-full w-full items-center justify-center">
             <QuestionBar />

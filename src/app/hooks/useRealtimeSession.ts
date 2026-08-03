@@ -50,11 +50,11 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
         historyHandlers.handleTranscriptionCompleted(event);
         break;
       }
-      case "response.audio_transcript.done": {
+      case "response.output_audio_transcript.done": {
         historyHandlers.handleTranscriptionCompleted(event);
         break;
       }
-      case "response.audio_transcript.delta": {
+      case "response.output_audio_transcript.delta": {
         historyHandlers.handleTranscriptionDelta(event);
         break;
       }
@@ -134,12 +134,12 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
             return pc;
           },
         }),
-        model: 'gpt-realtime-mini',
-        // config: {
-        //   inputAudioTranscription: {
-        //     model: 'gpt-4o-mini-transcribe',
-        //   },
-        // },
+        model: 'gpt-realtime-2',
+        config: {
+          inputAudioTranscription: {
+            model: 'gpt-realtime-whisper',
+          },
+        },
         outputGuardrails: outputGuardrails ?? [],
         context: extraContext ?? {},
       });

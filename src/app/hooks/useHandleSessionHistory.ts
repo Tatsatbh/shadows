@@ -7,9 +7,10 @@ import { useEvent } from "@/app/contexts/EventContext";
 export function useHandleSessionHistory() {
   const {
     transcriptItems,
-    addTranscriptBreadcrumb,
     addTranscriptMessage,
+    upsertTranscriptMessage,
     updateTranscriptMessage,
+    addTranscriptBreadcrumb,
     updateTranscriptItem,
   } = useTranscript();
 
@@ -23,8 +24,8 @@ export function useHandleSessionHistory() {
     return content
       .map((c) => {
         if (!c || typeof c !== "object") return "";
-        if (c.type === "input_text") return c.text ?? "";
-        if (c.type === "audio") return c.transcript ?? "";
+        if (c.type === "input_text" || c.type === "text") return c.text ?? "";
+        if (c.type === "audio" || c.type === "input_audio") return c.transcript ?? "";
         return "";
       })
       .filter(Boolean)
@@ -89,7 +90,9 @@ export function useHandleSessionHistory() {
     console.log("[handleHistoryAdded] ", item);
     if (!item || item.type !== 'message') return;
 
-    const { itemId, role, content = [] } = item;
+    const itemId = item.id || item.itemId;
+    const role = item.role;
+    const content = item.content || [];
     if (itemId && role) {
       const isUser = role === "user";
       let text = extractMessageText(content);
@@ -115,12 +118,14 @@ export function useHandleSessionHistory() {
     items.forEach((item: any) => {
       if (!item || item.type !== 'message') return;
 
-      const { itemId, content = [] } = item;
+      const itemId = item.id || item.itemId;
+      const role = item.role;
+      const content = item.content || [];
 
       const text = extractMessageText(content);
 
-      if (text) {
-        updateTranscriptMessage(itemId, text, false);
+      if (text && itemId && role) {
+        upsertTranscriptMessage(itemId, role, text);
       }
     });
   }
@@ -173,7 +178,8 @@ export function useHandleSessionHistory() {
       const rationale = moderation.moderationRationale ?? '';
       const offendingText: string | undefined = moderation?.testText;
 
-      updateTranscriptItem(lastAssistant.itemId, {
+      const targetId = lastAssistant.id || lastAssistant.itemId;
+      updateTranscriptItem(targetId, {
         guardrailResult: {
           status: 'DONE',
           category,

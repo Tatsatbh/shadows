@@ -18,6 +18,7 @@ type TranscriptContextValue = {
     text: string,
     isHidden?: boolean,
   ) => void;
+  upsertTranscriptMessage: (itemId: string, role: "user" | "assistant", text: string) => void;
   updateTranscriptMessage: (itemId: string, text: string, isDelta: boolean) => void;
   addTranscriptBreadcrumb: (title: string, data?: Record<string, any>) => void;
   toggleTranscriptItemExpand: (itemId: string) => void;
@@ -61,6 +62,32 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
       };
 
       return [...prev, newItem];
+    });
+  };
+
+  const upsertTranscriptMessage: TranscriptContextValue["upsertTranscriptMessage"] = (itemId, role, newText) => {
+    setTranscriptItems((prev) => {
+      const exists = prev.some(item => item.itemId === itemId && item.type === "MESSAGE");
+      if (exists) {
+        return prev.map((item) => {
+          if (item.itemId === itemId && item.type === "MESSAGE") {
+            return { ...item, title: newText };
+          }
+          return item;
+        });
+      } else {
+        return [...prev, {
+          itemId,
+          type: "MESSAGE",
+          role,
+          title: newText,
+          expanded: false,
+          timestamp: newTimestampPretty(),
+          createdAtMs: Date.now(),
+          status: "IN_PROGRESS",
+          isHidden: false,
+        }];
+      }
     });
   };
 
@@ -116,6 +143,7 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
       value={{
         transcriptItems,
         addTranscriptMessage,
+        upsertTranscriptMessage,
         updateTranscriptMessage,
         addTranscriptBreadcrumb,
         toggleTranscriptItemExpand,

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const response = await fetch(
-      "https://api.openai.com/v1/realtime/sessions",
+      "https://api.openai.com/v1/realtime/client_secrets",
       {
         method: "POST",
         headers: {
@@ -11,12 +11,18 @@ export async function GET() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-realtime-mini",
+          session: {
+            model: "gpt-realtime-2",
+            type: "realtime",
+            reasoning: {
+              effort: "low",
+            },
+          }
         }),
       }
     );
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({ client_secret: data });
   } catch (error) {
     console.error("Error in /session:", error);
     return NextResponse.json(

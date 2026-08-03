@@ -5,41 +5,57 @@ import Image from "next/image"
 interface CarouselItem {
   src: string
   alt: string
+  className?: string
 }
 
 interface InfiniteCarouselProps {
   items: CarouselItem[]
-  speed?: number
+  duration?: number
+  direction?: "left" | "right"
+  pauseOnHover?: boolean
+  className?: string
+  itemClassName?: string
   sizeMultipliers?: Record<string, number>
   paddingMultipliers?: Record<string, { top?: number; right?: number; bottom?: number; left?: number } | number>
 }
 
-export function InfiniteCarousel({ items, speed = 25, sizeMultipliers = {}, paddingMultipliers = {} }: InfiniteCarouselProps) {
+export function InfiniteCarousel({
+  items,
+  duration = 32,
+  direction = "left",
+  pauseOnHover = true,
+  className = "",
+  itemClassName = "",
+  sizeMultipliers = {},
+  paddingMultipliers = {},
+}: InfiniteCarouselProps) {
+  const repeatedItems = [...items, ...items, ...items]
+
   return (
-    <div className="relative w-full overflow-hidden py-6">
-      <div 
-        className="flex gap-16 items-center"
+    <div
+      className={`group relative w-full overflow-hidden py-6 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)] ${className}`}
+    >
+      <div
+        className={`flex w-max items-center gap-12 md:gap-16 ${pauseOnHover ? "group-hover:[animation-play-state:paused]" : ""}`}
         style={{
-          animation: `scroll ${speed}s linear infinite`,
-          width: 'max-content'
+          animation: `${direction === "left" ? "logo-scroll-left" : "logo-scroll-right"} ${duration}s linear infinite`,
         }}
       >
-        {/* Render items twice for seamless loop */}
-        {[...items, ...items].map((item, idx) => {
-          const filename = item.src.split('/').pop() || ''
+        {repeatedItems.map((item, idx) => {
+          const filename = item.src.split("/").pop() || ""
           const sizeMultiplier = sizeMultipliers[filename] || 1
           const paddingConfig = paddingMultipliers[filename] || 0
-          const padding = typeof paddingConfig === 'number' 
+          const padding = typeof paddingConfig === "number"
             ? `${paddingConfig}px`
             : `${paddingConfig.top || 0}px ${paddingConfig.right || 0}px ${paddingConfig.bottom || 0}px ${paddingConfig.left || 0}px`
-          
+
           return (
             <div
-              key={idx}
-              className="flex-shrink-0 flex items-center justify-center opacity-70"
+              key={`${item.alt}-${idx}`}
+              className={`flex h-16 min-w-[150px] shrink-0 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.035] px-8 opacity-70 transition-opacity hover:opacity-100 ${itemClassName}`}
               style={{
                 transform: `scale(${sizeMultiplier})`,
-                padding
+                padding,
               }}
             >
               <Image
@@ -47,25 +63,30 @@ export function InfiniteCarousel({ items, speed = 25, sizeMultipliers = {}, padd
                 alt={item.alt}
                 width={140}
                 height={48}
-                className="h-12 w-auto object-contain brightness-0 invert"
+                className={`h-10 w-auto object-contain brightness-0 invert grayscale ${item.className || ""}`}
                 priority={idx < items.length}
               />
             </div>
           )
         })}
       </div>
-      
-      {/* Gradient overlays */}
-      <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-void-page to-transparent pointer-events-none z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-void-page to-transparent pointer-events-none z-10" />
-      
+
       <style jsx>{`
-        @keyframes scroll {
+        @keyframes logo-scroll-left {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(-33.333333%);
+          }
+        }
+
+        @keyframes logo-scroll-right {
+          0% {
+            transform: translateX(-33.333333%);
+          }
+          100% {
+            transform: translateX(0);
           }
         }
       `}</style>

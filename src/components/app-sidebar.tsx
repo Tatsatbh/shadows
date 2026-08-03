@@ -54,19 +54,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       variant="inset"
-      className="[--sidebar-background:240_10%_3.9%] [--sidebar-accent:240_6%_7%] [--sidebar-border:240_3.7%_15.9%] [--sidebar-foreground:0_0%_98%]"
       {...props}
     >
-      <SidebarHeader className="border-b border-white/10 p-4">
+      <SidebarHeader className="border-b border-border/50 dark:border-white/10 p-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               asChild
-              className="h-11 rounded-[6px] px-1.5 text-white hover:bg-white/[0.04] data-[state=open]:bg-white/[0.04]"
+              className="h-11 rounded-[6px] px-1.5 text-foreground hover:bg-muted/50 data-[state=open]:bg-muted/50 dark:hover:bg-white/[0.04] dark:data-[state=open]:bg-white/[0.04]"
             >
               <Link href="/dashboard">
-                <div className="relative grid size-9 shrink-0 place-items-center border border-dashed border-white/55 text-blue-500">
+                <div className="relative grid size-9 shrink-0 place-items-center border border-dashed border-border/80 dark:border-white/55 text-blue-500">
                   <Terminal className="size-4" />
                   <span className="absolute -left-1 -top-1 h-2 w-2 border-l border-t border-blue-500" />
                   <span className="absolute -bottom-1 -right-1 h-2 w-2 border-b border-r border-blue-500" />
@@ -85,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="gap-0 px-2 py-4">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-white/10 p-3">
+      <SidebarFooter className="border-t border-border/50 dark:border-white/10 p-3">
         <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>

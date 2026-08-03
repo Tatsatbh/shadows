@@ -17,6 +17,8 @@ interface RadarChartProps {
     activeDimension?: number | null
 }
 
+type TextAnchor = "start" | "middle" | "end"
+
 export function RadarChart({
     dimensions,
     size = 280,
@@ -40,7 +42,7 @@ export function RadarChart({
         const axisPoints: { x: number; y: number }[] = []
         const axisStartPoints: { x: number; y: number }[] = []
         const dataPoints: { x: number; y: number }[] = []
-        const labelPositions: { x: number; y: number; anchor: string }[] = []
+        const labelPositions: { x: number; y: number; anchor: TextAnchor }[] = []
 
         dimensions.forEach((dim, i) => {
             const angle = startAngle + i * angleStep
@@ -65,7 +67,7 @@ export function RadarChart({
 
             const lx = center + labelRadius * Math.cos(angle)
             const ly = center + labelRadius * Math.sin(angle)
-            let anchor = "middle"
+            let anchor: TextAnchor = "middle"
             if (Math.cos(angle) < -0.1) anchor = "end"
             else if (Math.cos(angle) > 0.1) anchor = "start"
 

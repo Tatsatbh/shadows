@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   BadgeCheck,
   Bell,
@@ -63,9 +64,9 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="h-12 rounded-[6px] border border-white/10 bg-white/[0.035] px-2 text-zinc-200 hover:bg-white/[0.06] hover:text-white data-[state=open]:bg-white/[0.06] data-[state=open]:text-white"
+              className="h-12 rounded-[6px] border border-border/50 bg-muted/30 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground data-[state=open]:bg-muted/50 data-[state=open]:text-foreground dark:border-white/10 dark:bg-white/[0.035] dark:text-zinc-200 dark:hover:bg-white/[0.06] dark:hover:text-white dark:data-[state=open]:bg-white/[0.06] dark:data-[state=open]:text-white"
             >
-              <Avatar className="h-8 w-8 rounded-[6px] border border-white/10">
+              <Avatar className="h-8 w-8 rounded-[6px] border border-border/50 dark:border-white/10">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-[6px] bg-blue-500/10 text-xs text-blue-500">
                   {initials}
@@ -79,14 +80,14 @@ export function NavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-[8px] border-white/10 bg-[#05070a] text-zinc-200"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-[8px] border-border dark:border-white/10 bg-background dark:bg-[#05070a] text-foreground dark:text-zinc-200"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-[6px] border border-white/10">
+                <Avatar className="h-8 w-8 rounded-[6px] border border-border/50 dark:border-white/10">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-[6px] bg-blue-500/10 text-xs text-blue-500">
                     {initials}
@@ -100,28 +101,36 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem asChild>
+                <Link href="/upgrade">
+                  <Sparkles />
+                  Upgrade to Pro
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link href="/billing">
+                  <CreditCard />
+                  Billing
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/notifications">
+                  <Bell />
+                  Notifications
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut />
               Log out
             </DropdownMenuItem>

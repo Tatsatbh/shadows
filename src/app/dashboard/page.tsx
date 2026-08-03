@@ -26,6 +26,9 @@ import { InterviewCardSkeleton } from "@/components/skeletons"
 import { createClient } from "@/lib/supabase/client"
 import { HeaderControls } from "@/components/header-controls"
 import { JoinSessionDialog } from "@/components/app/JoinSessionDialog"
+import { Activity, ChevronRight, Code2, Coins, Radio, Terminal } from "lucide-react"
+import { DifficultyFilter, type DifficultyLevel } from "@/components/difficulty-filter"
+import { AmazonSmileLogo, GoogleGLogo, AppleLogo } from "@/components/company-logos"
 import {
   Card,
   CardContent,
@@ -33,7 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Activity, Code2, Coins, Radio, Terminal } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 type Problem = {
   id: string
@@ -55,6 +58,7 @@ export default function Page() {
   const [userId, setUserId] = useState<string | null>(null)
   const [joinDialogOpen, setJoinDialogOpen] = useState(false)
   const [selectedProblem, setSelectedProblem] = useState<any>(null)
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyLevel>("All")
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -87,6 +91,11 @@ export default function Page() {
   const problemList = useMemo<Problem[]>(() => {
     return Array.isArray(problems) ? problems : []
   }, [problems])
+
+  const filteredProblemList = useMemo(() => {
+    if (difficultyFilter === "All") return problemList
+    return problemList.filter(p => p.difficulty === difficultyFilter)
+  }, [problemList, difficultyFilter])
 
   const difficultyCounts = useMemo(() => {
     return problemList.reduce(
@@ -190,23 +199,32 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[8px] border-border/70 bg-card/85 shadow-none backdrop-blur dark:border-white/10 dark:bg-[#05070a]/90">
+            <Card className="flex flex-col rounded-[8px] border-border/70 bg-card/85 shadow-none backdrop-blur dark:border-white/10 dark:bg-[#05070a]/90">
               <CardHeader className="p-5 pb-3">
                 <CardTitle className="flex items-center gap-2 font-opencode text-sm font-medium">
                   <Terminal className="h-4 w-4 text-blue-500" />
-                  Difficulty mix
+                  Target Loops
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 px-5 pb-5">
-                {(["Easy", "Medium", "Hard"] as const).map((difficulty) => (
-                  <div key={difficulty} className="flex items-center justify-between rounded-[6px] border border-border/60 bg-muted/30 px-3 py-2 dark:border-white/10 dark:bg-white/[0.035]">
-                    <div>
-                      <p className="text-sm font-medium">{difficulty}</p>
-                      <p className="text-xs text-muted-foreground">{difficultyCopy[difficulty]}</p>
+              <CardContent className="flex flex-1 flex-col px-5 pb-5">
+                <div className="flex flex-1 flex-col justify-between gap-2">
+                  {[
+                    { name: "Amazon SDE Intern", Logo: AmazonSmileLogo },
+                    { name: "Google SWE Intern", Logo: GoogleGLogo },
+                    { name: "Apple SWE", Logo: AppleLogo },
+                  ].map((loop) => (
+                    <div key={loop.name} className="group flex cursor-pointer items-center justify-between rounded-[6px] border border-border/60 bg-muted/30 px-3 py-2 transition-colors hover:bg-muted/50 dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.055]">
+                      <div className="flex items-center gap-3">
+                        <loop.Logo className="h-5 w-5 object-contain opacity-80 transition-opacity group-hover:opacity-100" />
+                        <p className="text-sm font-medium">{loop.name} Loop</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                     </div>
-                    <span className="font-opencode text-lg text-blue-500">{difficultyCounts[difficulty]}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <Button variant="outline" className="mt-4 w-full rounded-[6px] border-border/60 bg-muted/30 font-medium transition-colors hover:bg-muted/50 dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.055] dark:text-white">
+                  View all loops
+                </Button>
               </CardContent>
             </Card>
           </section>
@@ -223,6 +241,13 @@ export default function Page() {
                 </Badge>
               </div>
 
+              <div className="mb-4">
+                <DifficultyFilter 
+                  value={difficultyFilter} 
+                  onChange={setDifficultyFilter} 
+                />
+              </div>
+
               {error && (
                 <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
                   Error loading problems: {error.message}
@@ -233,7 +258,7 @@ export default function Page() {
                 {isLoading && [...Array(6)].map((_, i) => (
                   <InterviewCardSkeleton key={i} />
                 ))}
-                {problemList.map((problem) => (
+                {filteredProblemList.map((problem) => (
                   <InterviewCard
                     key={problem.id}
                     questionNumber={problem.question_number}
@@ -242,6 +267,11 @@ export default function Page() {
                     onClick={() => handleJoinClick(problem)}
                   />
                 ))}
+                {!isLoading && filteredProblemList.length === 0 && (
+                  <div className="col-span-full py-8 text-center text-sm text-muted-foreground border rounded-[8px] border-dashed border-border/60">
+                    No {difficultyFilter !== "All" ? difficultyFilter.toLowerCase() : ""} problems available right now.
+                  </div>
+                )}
               </div>
             </section>
 

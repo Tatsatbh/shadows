@@ -29,7 +29,7 @@ export function EditorPanel({
   onSubmit,
 }: EditorPanelProps) {
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-void-elevated">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-card/85 dark:bg-[#05070a]/90">
       <EditorCommandBar
         language={language}
         onLanguageChange={onLanguageChange}
@@ -46,7 +46,7 @@ export function EditorPanel({
           </AlertDescription>
         </Alert>
       )}
-      <div className="min-h-0 flex-1 border-t border-edge-subtle">
+      <div className="min-h-0 flex-1 border-t border-border/60 dark:border-white/10">
         <Editor
           language={language === "cpp" ? "cpp" : language}
           value={code}

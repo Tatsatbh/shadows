@@ -10,27 +10,27 @@ interface TimerDisplayProps {
 }
 
 const containerStyles: Record<TimerStyle, string> = {
-  neutral: "bg-gray-900 text-white",
-  warning: "bg-amber-500 text-white",
-  urgent: "bg-red-600 text-white",
+  neutral: "bg-card dark:bg-[#05070a]/90 text-foreground border border-border/70 dark:border-white/10",
+  warning: "bg-amber-500/10 text-amber-500 border border-amber-500/25",
+  urgent: "bg-rose-500/10 text-rose-500 border border-rose-500/25",
 }
 
 const dotStyles: Record<TimerStyle, string> = {
-  neutral: "bg-green-500",
-  warning: "bg-white",
-  urgent: "bg-white",
+  neutral: "bg-emerald-500",
+  warning: "bg-amber-500",
+  urgent: "bg-rose-500",
 }
 
 function TimerDisplayInner({ formattedTime, timerStyle }: TimerDisplayProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-2.5 px-3 py-1.5 rounded-md font-mono text-sm font-semibold shadow-sm",
+        "flex items-center gap-2 px-3 py-1 rounded-[4px] font-mono text-xs font-semibold transition-colors",
         containerStyles[timerStyle]
       )}
     >
       {/* Pulsating live dot */}
-      <span className="relative flex h-2.5 w-2.5">
+      <span className="relative flex h-2 w-2">
         <span
           className={cn(
             "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
@@ -39,12 +39,12 @@ function TimerDisplayInner({ formattedTime, timerStyle }: TimerDisplayProps) {
         />
         <span
           className={cn(
-            "relative inline-flex rounded-full h-2.5 w-2.5",
+            "relative inline-flex rounded-full h-2 w-2",
             dotStyles[timerStyle]
           )}
         />
       </span>
-      <span className="tracking-wider">{formattedTime}</span>
+      <span className="tracking-widest tabular-nums">{formattedTime}</span>
     </div>
   )
 }
