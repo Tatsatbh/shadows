@@ -1,0 +1,65 @@
+{
+  "question_uri": "design-add-and-search-words",
+  "cases": [
+    {
+      "input": "ops = [\"addWord bad\",\"addWord dad\",\"addWord mad\",\"search pad\",\"search bad\",\"search .ad\",\"search b..\"]",
+      "expected_output": "4\nfalse\ntrue\ntrue\ntrue",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"search a\"]",
+      "expected_output": "1\nfalse",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"addWord a\",\"search .\"]",
+      "expected_output": "1\ntrue",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"addWord ab\",\"search a.\",\"search .b\",\"search ..\"]",
+      "expected_output": "3\ntrue\ntrue\ntrue",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"addWord a\",\"search a\",\"search b\"]",
+      "expected_output": "2\ntrue\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord abc\",\"search ...\",\"search ....\",\"search ..\",\"search a.c\"]",
+      "expected_output": "4\ntrue\nfalse\nfalse\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord at\",\"addWord and\",\"addWord an\",\"search a.\",\"search .n\"]",
+      "expected_output": "2\ntrue\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord xyz\",\"search x..\",\"search ..z\",\"search ...z\"]",
+      "expected_output": "3\ntrue\ntrue\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord aa\",\"addWord ab\",\"search a.\"]",
+      "expected_output": "1\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord hello\",\"search h.llo\",\"search hell.\",\"search .....\",\"search ......\"]",
+      "expected_output": "4\ntrue\ntrue\ntrue\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord 12\",\"search 1.\",\"search .2\"]",
+      "expected_output": "2\ntrue\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"addWord wa0\",\"addWord wb1\",\"addWord wc2\",\"addWord wd3\",\"addWord we4\",\"addWord wf5\",\"addWord wg6\",\"addWord wh7\",\"addWord wi8\",\"addWord wj9\",\"addWord wk10\",\"addWord wl11\",\"addWord wm12\",\"addWord wn13\",\"addWord wo14\",\"addWord wp15\",\"addWord wq16\",\"addWord wr17\",\"addWord ws18\",\"addWord wt19\",\"addWord wu20\",\"addWord wv21\",\"addWord ww22\",\"addWord wx23\",\"addWord wy24\",\"addWord wz25\",\"addWord wa26\",\"addWord wb27\",\"addWord wc28\",\"addWord wd29\",\"addWord we30\",\"addWord wf31\",\"addWord wg32\",\"addWord wh33\",\"addWord wi34\",\"addWord wj35\",\"addWord wk36\",\"addWord wl37\",\"addWord wm38\",\"addWord wn39\",\"addWord wo40\",\"addWord wp41\",\"addWord wq42\",\"addWord wr43\",\"addWord ws44\",\"addWord wt45\",\"addWord wu46\",\"addWord wv47\",\"addWord ww48\",\"addWord wx49\",\"addWord wy50\",\"addWord wz51\",\"addWord wa52\",\"addWord wb53\",\"addWord wc54\",\"addWord wd55\",\"addWord we56\",\"addWord wf57\",\"addWord wg58\",\"addWord wh59\",\"addWord wi60\",\"addWord wj61\",\"addWord wk62\",\"addWord wl63\",\"addWord wm64\",\"addWord wn65\",\"addWord wo66\",\"addWord wp67\",\"addWord wq68\",\"addWord wr69\",\"addWord ws70\",\"addWord wt71\",\"addWord wu72\",\"addWord wv73\",\"addWord ww74\",\"addWord wx75\",\"addWord wy76\",\"addWord wz77\",\"addWord wa78\",\"addWord wb79\",\"addWord wc80\",\"addWord wd81\",\"addWord we82\",\"addWord wf83\",\"addWord wg84\",\"addWord wh85\",\"addWord wi86\",\"addWord wj87\",\"addWord wk88\",\"addWord wl89\",\"addWord wm90\",\"addWord wn91\",\"addWord wo92\",\"addWord wp93\",\"addWord wq94\",\"addWord wr95\",\"addWord ws96\",\"addWord wt97\",\"addWord wu98\",\"addWord wv99\",\"addWord ww100\",\"addWord wx101\",\"addWord wy102\",\"addWord wz103\",\"addWord wa104\",\"addWord wb105\",\"addWord wc106\",\"addWord wd107\",\"addWord we108\",\"addWord wf109\",\"addWord wg110\",\"addWord wh111\",\"addWord wi112\",\"addWord wj113\",\"addWord wk114\",\"addWord wl115\",\"addWord wm116\",\"addWord wn117\",\"addWord wo118\",\"addWord wp119\",\"addWord wq120\",\"addWord wr121\",\"addWord ws122\",\"addWord wt123\",\"addWord wu124\",\"addWord wv125\",\"addWord ww126\",\"addWord wx127\",\"addWord wy128\",\"addWord wz129\",\"addWord wa130\",\"addWord wb131\",\"addWord wc132\",\"addWord wd133\",\"addWord we134\",\"addWord wf135\",\"addWord wg136\",\"addWord wh137\",\"addWord wi138\",\"addWord wj139\",\"addWord wk140\",\"addWord wl141\",\"addWord wm142\",\"addWord wn143\",\"addWord wo144\",\"addWord wp145\",\"addWord wq146\",\"addWord wr147\",\"addWord ws148\",\"addWord wt149\",\"addWord wu150\",\"addWord wv151\",\"addWord ww152\",\"addWord wx153\",\"addWord wy154\",\"addWord wz155\",\"addWord wa156\",\"addWord wb157\",\"addWord wc158\",\"addWord wd159\",\"addWord we160\",\"addWord wf161\",\"addWord wg162\",\"addWord wh163\",\"addWord wi164\",\"addWord wj165\",\"addWord wk166\",\"addWord wl167\",\"addWord wm168\",\"addWord wn169\",\"addWord wo170\",\"addWord wp171\",\"addWord wq172\",\"addWord wr173\",\"addWord ws174\",\"addWord wt175\",\"addWord wu176\",\"addWord wv177\",\"addWord ww178\",\"addWord wx179\",\"addWord wy180\",\"addWord wz181\",\"addWord wa182\",\"addWord wb183\",\"addWord wc184\",\"addWord wd185\",\"addWord we186\",\"addWord wf187\",\"addWord wg188\",\"addWord wh189\",\"addWord wi190\",\"addWord wj191\",\"addWord wk192\",\"addWord wl193\",\"addWord wm194\",\"addWord wn195\",\"addWord wo196\",\"addWord wp197\",\"addWord wq198\",\"addWord wr199\",\"search w.1\",\"search ......\",\"search wa0\",\"search zzzz\"]",
+      "expected_output": "4\ntrue\nfalse\ntrue\nfalse",
+      "hidden": true
+    }
+  ]
+}

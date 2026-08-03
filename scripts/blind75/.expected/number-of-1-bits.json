@@ -1,0 +1,65 @@
+{
+  "question_uri": "number-of-1-bits",
+  "cases": [
+    {
+      "input": "n = 11",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "n = 128",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "n = 4294967293",
+      "expected_output": "31",
+      "hidden": false
+    },
+    {
+      "input": "n = 0",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "n = 2",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "n = 3",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "n = 255",
+      "expected_output": "8",
+      "hidden": true
+    },
+    {
+      "input": "n = 2147483647",
+      "expected_output": "31",
+      "hidden": true
+    },
+    {
+      "input": "n = 4294967295",
+      "expected_output": "32",
+      "hidden": true
+    },
+    {
+      "input": "n = 2147483648",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "n = 1048576",
+      "expected_output": "1",
+      "hidden": true
+    }
+  ]
+}

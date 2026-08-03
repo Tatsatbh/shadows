@@ -1,0 +1,65 @@
+{
+  "question_uri": "unique-paths",
+  "cases": [
+    {
+      "input": "m = 3\nn = 7",
+      "expected_output": "28",
+      "hidden": false
+    },
+    {
+      "input": "m = 3\nn = 2",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "m = 1\nn = 1",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "m = 3\nn = 3",
+      "expected_output": "6",
+      "hidden": false
+    },
+    {
+      "input": "m = 1\nn = 10",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "m = 10\nn = 1",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "m = 2\nn = 2",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "m = 5\nn = 5",
+      "expected_output": "70",
+      "hidden": true
+    },
+    {
+      "input": "m = 7\nn = 3",
+      "expected_output": "28",
+      "hidden": true
+    },
+    {
+      "input": "m = 10\nn = 10",
+      "expected_output": "48620",
+      "hidden": true
+    },
+    {
+      "input": "m = 16\nn = 16",
+      "expected_output": "155117520",
+      "hidden": true
+    },
+    {
+      "input": "m = 17\nn = 17",
+      "expected_output": "601080390",
+      "hidden": true
+    }
+  ]
+}

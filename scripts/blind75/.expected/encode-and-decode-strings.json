@@ -1,0 +1,65 @@
+{
+  "question_uri": "encode-and-decode-strings",
+  "cases": [
+    {
+      "input": "strs = [\"hello\",\"world\"]",
+      "expected_output": "2\nhello\nworld",
+      "hidden": false
+    },
+    {
+      "input": "strs = []",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "strs = [\"a#b\",\"c\"]",
+      "expected_output": "2\na#b\nc",
+      "hidden": false
+    },
+    {
+      "input": "strs = [\"neet\",\"code\",\"love\",\"you\"]",
+      "expected_output": "4\nneet\ncode\nlove\nyou",
+      "hidden": false
+    },
+    {
+      "input": "strs = [\"\"]",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"\",\"\"]",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"#\",\"##\",\"###\"]",
+      "expected_output": "3\n#\n##\n###",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"1#2\",\"3\"]",
+      "expected_output": "2\n1#2\n3",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"a b\",\"c d\"]",
+      "expected_output": "2\na b\nc d",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"x\"]",
+      "expected_output": "1\nx",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"4#abc\",\"5\"]",
+      "expected_output": "2\n4#abc\n5",
+      "hidden": true
+    },
+    {
+      "input": "strs = [\"longer string with spaces\",\"another one\",\"3#4#5\"]",
+      "expected_output": "3\nlonger string with spaces\nanother one\n3#4#5",
+      "hidden": true
+    }
+  ]
+}

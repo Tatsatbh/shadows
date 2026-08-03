@@ -1,0 +1,65 @@
+{
+  "question_uri": "longest-common-subsequence",
+  "cases": [
+    {
+      "input": "text1 = \"abcde\"\ntext2 = \"ace\"",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "text1 = \"abc\"\ntext2 = \"abc\"",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "text1 = \"abc\"\ntext2 = \"def\"",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "text1 = \"a\"\ntext2 = \"a\"",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "text1 = \"a\"\ntext2 = \"b\"",
+      "expected_output": "0",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"ezupkr\"\ntext2 = \"ubmrapg\"",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"bsbininm\"\ntext2 = \"jmjkbkjkv\"",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"oxcpqrsvwf\"\ntext2 = \"shmtulqrypy\"",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"abcba\"\ntext2 = \"abcbcba\"",
+      "expected_output": "5",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"aaaa\"\ntext2 = \"aa\"",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"pmjghexybyrgzczy\"\ntext2 = \"hafcdqbgncrcbihkd\"",
+      "expected_output": "4",
+      "hidden": true
+    },
+    {
+      "input": "text1 = \"abcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcdeabcde\"\ntext2 = \"aceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceaceace\"",
+      "expected_output": "600",
+      "hidden": true
+    }
+  ]
+}

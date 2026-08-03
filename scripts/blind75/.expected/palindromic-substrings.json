@@ -1,0 +1,65 @@
+{
+  "question_uri": "palindromic-substrings",
+  "cases": [
+    {
+      "input": "s = \"abc\"",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "s = \"aaa\"",
+      "expected_output": "6",
+      "hidden": false
+    },
+    {
+      "input": "s = \"abba\"",
+      "expected_output": "6",
+      "hidden": false
+    },
+    {
+      "input": "s = \"a\"",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "s = \"ab\"",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "s = \"aa\"",
+      "expected_output": "3",
+      "hidden": true
+    },
+    {
+      "input": "s = \"racecar\"",
+      "expected_output": "10",
+      "hidden": true
+    },
+    {
+      "input": "s = \"abcba\"",
+      "expected_output": "7",
+      "hidden": true
+    },
+    {
+      "input": "s = \"aaaa\"",
+      "expected_output": "10",
+      "hidden": true
+    },
+    {
+      "input": "s = \"abacaba\"",
+      "expected_output": "12",
+      "hidden": true
+    },
+    {
+      "input": "s = \"zzzzzzzzzz\"",
+      "expected_output": "55",
+      "hidden": true
+    },
+    {
+      "input": "s = \"abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab\"",
+      "expected_output": "250500",
+      "hidden": true
+    }
+  ]
+}

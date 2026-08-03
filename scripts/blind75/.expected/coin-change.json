@@ -1,0 +1,65 @@
+{
+  "question_uri": "coin-change",
+  "cases": [
+    {
+      "input": "coins = [1,2,5]\namount = 11",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "coins = [2]\namount = 3",
+      "expected_output": "-1",
+      "hidden": false
+    },
+    {
+      "input": "coins = [1]\namount = 0",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "coins = [1,2,5]\namount = 100",
+      "expected_output": "20",
+      "hidden": false
+    },
+    {
+      "input": "coins = [2,5,10,1]\namount = 27",
+      "expected_output": "4",
+      "hidden": true
+    },
+    {
+      "input": "coins = [186,419,83,408]\namount = 6249",
+      "expected_output": "20",
+      "hidden": true
+    },
+    {
+      "input": "coins = [1]\namount = 1",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "coins = [1]\namount = 2",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "coins = [5]\namount = 5",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "coins = [3,7]\namount = 5",
+      "expected_output": "-1",
+      "hidden": true
+    },
+    {
+      "input": "coins = [1,5,10,25]\namount = 63",
+      "expected_output": "6",
+      "hidden": true
+    },
+    {
+      "input": "coins = [411,412,413,414,415,416,417,418,419,420,421,422]\namount = 9864",
+      "expected_output": "24",
+      "hidden": true
+    }
+  ]
+}

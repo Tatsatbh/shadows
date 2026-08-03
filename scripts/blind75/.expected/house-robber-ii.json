@@ -1,0 +1,65 @@
+{
+  "question_uri": "house-robber-ii",
+  "cases": [
+    {
+      "input": "nums = [2,3,2]",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "nums = [1,2,3,1]",
+      "expected_output": "4",
+      "hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "nums = [5]",
+      "expected_output": "5",
+      "hidden": false
+    },
+    {
+      "input": "nums = [1,2]",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "nums = [0]",
+      "expected_output": "0",
+      "hidden": true
+    },
+    {
+      "input": "nums = [200,3,140,20,10]",
+      "expected_output": "340",
+      "hidden": true
+    },
+    {
+      "input": "nums = [1,1,1,1]",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "nums = [10,1,1,10]",
+      "expected_output": "11",
+      "hidden": true
+    },
+    {
+      "input": "nums = [100,1,1,100,1,1,100]",
+      "expected_output": "201",
+      "hidden": true
+    },
+    {
+      "input": "nums = [1,2,3,4,5,6,7,8,9,10]",
+      "expected_output": "30",
+      "hidden": true
+    },
+    {
+      "input": "nums = [0,211,422,633,844,54,265,476,687,898,108,319,530,741,952,162,373,584,795,5,216,427,638,849,59,270,481,692,903,113,324,535,746,957,167,378,589,800,10,221,432,643,854,64,275,486,697,908,118,329,540,751,962,172,383,594,805,15,226,437,648,859,69,280,491,702,913,123,334,545,756,967,177,388,599,810,20,231,442,653,864,74,285,496,707,918,128,339,550,761,972,182,393,604,815,25,236,447,658,869]",
+      "expected_output": "28166",
+      "hidden": true
+    }
+  ]
+}

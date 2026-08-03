@@ -1,0 +1,65 @@
+{
+  "question_uri": "word-search",
+  "cases": [
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]]\nword = \"ABCCED\"",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]]\nword = \"SEE\"",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "board = [[\"A\",\"B\"],[\"C\",\"D\"]]\nword = \"ABCD\"",
+      "expected_output": "false",
+      "hidden": false
+    },
+    {
+      "input": "board = [[\"A\"]]\nword = \"A\"",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "board = [[\"A\"]]\nword = \"B\"",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]]\nword = \"ABCB\"",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"a\",\"b\"],[\"c\",\"d\"]]\nword = \"abcd\"",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"C\",\"A\",\"A\"],[\"A\",\"A\",\"A\"],[\"B\",\"C\",\"D\"]]\nword = \"AAB\"",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"a\",\"a\"]]\nword = \"aaa\"",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"E\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]]\nword = \"ABCESEEEFS\"",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"b\",\"a\",\"a\",\"b\",\"a\",\"b\"],[\"a\",\"b\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"b\",\"a\",\"a\",\"a\",\"b\"],[\"a\",\"b\",\"a\",\"b\",\"b\",\"a\"],[\"a\",\"a\",\"b\",\"b\",\"a\",\"b\"],[\"a\",\"a\",\"b\",\"b\",\"b\",\"a\"]]\nword = \"abbbababaa\"",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "board = [[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"],[\"a\",\"a\",\"a\",\"a\",\"a\",\"a\"]]\nword = \"aaaaaaaaaaaab\"",
+      "expected_output": "false",
+      "hidden": true
+    }
+  ]
+}

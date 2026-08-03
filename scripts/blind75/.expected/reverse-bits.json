@@ -1,0 +1,65 @@
+{
+  "question_uri": "reverse-bits",
+  "cases": [
+    {
+      "input": "n = 43261596",
+      "expected_output": "964176192",
+      "hidden": false
+    },
+    {
+      "input": "n = 4294967293",
+      "expected_output": "3221225471",
+      "hidden": false
+    },
+    {
+      "input": "n = 1",
+      "expected_output": "2147483648",
+      "hidden": false
+    },
+    {
+      "input": "n = 0",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "n = 2",
+      "expected_output": "1073741824",
+      "hidden": true
+    },
+    {
+      "input": "n = 2147483648",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "n = 4294967295",
+      "expected_output": "4294967295",
+      "hidden": true
+    },
+    {
+      "input": "n = 2147483647",
+      "expected_output": "4294967294",
+      "hidden": true
+    },
+    {
+      "input": "n = 128",
+      "expected_output": "16777216",
+      "hidden": true
+    },
+    {
+      "input": "n = 65535",
+      "expected_output": "4294901760",
+      "hidden": true
+    },
+    {
+      "input": "n = 3221225472",
+      "expected_output": "3",
+      "hidden": true
+    },
+    {
+      "input": "n = 1048576",
+      "expected_output": "2048",
+      "hidden": true
+    }
+  ]
+}

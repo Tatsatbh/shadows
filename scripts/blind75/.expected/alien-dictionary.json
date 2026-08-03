@@ -1,0 +1,65 @@
+{
+  "question_uri": "alien-dictionary",
+  "cases": [
+    {
+      "input": "words = [\"wrt\",\"wrf\",\"er\",\"ett\",\"rftt\"]",
+      "expected_output": "5\nwertf",
+      "hidden": false
+    },
+    {
+      "input": "words = [\"z\",\"x\"]",
+      "expected_output": "2\nzx",
+      "hidden": false
+    },
+    {
+      "input": "words = [\"abc\",\"ab\"]",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "words = [\"z\",\"x\",\"z\"]",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "words = [\"a\"]",
+      "expected_output": "1\na",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"ab\",\"adc\"]",
+      "expected_output": "4\nabcd",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"a\",\"b\",\"c\"]",
+      "expected_output": "3\nabc",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"ac\",\"ab\",\"zc\",\"zb\"]",
+      "expected_output": "4\nacbz",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"ab\",\"ab\"]",
+      "expected_output": "2\nab",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"zy\",\"zx\"]",
+      "expected_output": "3\nyxz",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"wrt\",\"wrtkj\"]",
+      "expected_output": "5\njkrtw",
+      "hidden": true
+    },
+    {
+      "input": "words = [\"dfg\",\"dfh\",\"hgf\",\"hfa\",\"abc\"]",
+      "expected_output": "7\nbcdgfha",
+      "hidden": true
+    }
+  ]
+}
