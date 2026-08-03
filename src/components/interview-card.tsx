@@ -10,8 +10,12 @@ interface InterviewCardProps {
   questionNumber: number
   title: string
   difficulty: 'Easy' | 'Medium' | 'Hard'
+  /** One-line description of the problem. Falls back to generic copy when absent. */
+  summary?: string | null
   onClick?: () => void
 }
+
+const DEFAULT_SUMMARY = "Start a voice-led room with live code review and tests."
 
 const difficultyStyles = {
   Easy: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
@@ -23,6 +27,7 @@ export function InterviewCard({
   questionNumber,
   title,
   difficulty,
+  summary,
   onClick,
 }: InterviewCardProps) {
   return (
@@ -53,8 +58,8 @@ export function InterviewCard({
           <h3 className="line-clamp-2 text-base font-semibold leading-6 text-foreground">
             {title}
           </h3>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Start a voice-led room with live code review and tests.
+          <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
+            {summary || DEFAULT_SUMMARY}
           </p>
         </div>
 

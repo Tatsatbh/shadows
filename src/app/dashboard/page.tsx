@@ -44,6 +44,7 @@ type Problem = {
   question_uri: string
   title: string
   difficulty: "Easy" | "Medium" | "Hard"
+  summary: string | null
 }
 
 const difficultyCopy = {
@@ -264,6 +265,7 @@ export default function Page() {
                     questionNumber={problem.question_number}
                     title={problem.title}
                     difficulty={problem.difficulty}
+                    summary={problem.summary}
                     onClick={() => handleJoinClick(problem)}
                   />
                 ))}
