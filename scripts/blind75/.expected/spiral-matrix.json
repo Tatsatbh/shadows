@@ -1,5 +1,9 @@
 {
   "question_uri": "spiral-matrix",
+  "wrongFailsOn": {
+    "cpp": 1,
+    "python": 1
+  },
   "cases": [
     {
       "input": "matrix = [[1,2,3],[4,5,6],[7,8,9]]",

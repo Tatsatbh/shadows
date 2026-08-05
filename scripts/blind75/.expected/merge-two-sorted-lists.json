@@ -1,5 +1,9 @@
 {
   "question_uri": "merge-two-sorted-lists",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "list1 = [1,2,4]\nlist2 = [1,3,4]",

@@ -1,5 +1,9 @@
 {
   "question_uri": "non-overlapping-intervals",
+  "wrongFailsOn": {
+    "cpp": 6,
+    "python": 6
+  },
   "cases": [
     {
       "input": "intervals = [[1,2],[2,3],[3,4],[1,3]]",

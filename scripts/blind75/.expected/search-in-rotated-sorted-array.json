@@ -1,5 +1,9 @@
 {
   "question_uri": "search-in-rotated-sorted-array",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "nums = [4,5,6,7,0,1,2]\ntarget = 0",

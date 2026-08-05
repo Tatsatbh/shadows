@@ -1,5 +1,9 @@
 {
   "question_uri": "coin-change",
+  "wrongFailsOn": {
+    "cpp": 5,
+    "python": 5
+  },
   "cases": [
     {
       "input": "coins = [1,2,5]\namount = 11",

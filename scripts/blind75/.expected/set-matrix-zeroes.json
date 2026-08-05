@@ -1,5 +1,9 @@
 {
   "question_uri": "set-matrix-zeroes",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "matrix = [[1,1,1],[1,0,1],[1,1,1]]",

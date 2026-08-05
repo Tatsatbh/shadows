@@ -1,5 +1,9 @@
 {
   "question_uri": "sum-of-two-integers",
+  "wrongFailsOn": {
+    "cpp": 1,
+    "python": 1
+  },
   "cases": [
     {
       "input": "a = 1\nb = 2",

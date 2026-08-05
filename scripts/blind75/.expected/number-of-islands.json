@@ -1,5 +1,9 @@
 {
   "question_uri": "number-of-islands",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "grid = [[\"1\",\"1\",\"0\"],[\"1\",\"1\",\"0\"],[\"0\",\"0\",\"1\"]]",

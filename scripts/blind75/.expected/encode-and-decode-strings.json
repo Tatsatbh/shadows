@@ -1,5 +1,9 @@
 {
   "question_uri": "encode-and-decode-strings",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "strs = [\"hello\",\"world\"]",

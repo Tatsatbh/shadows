@@ -1,5 +1,9 @@
 {
   "question_uri": "linked-list-cycle",
+  "wrongFailsOn": {
+    "cpp": 11,
+    "python": 11
+  },
   "cases": [
     {
       "input": "head = [3,2,0,-4]\npos = 1",

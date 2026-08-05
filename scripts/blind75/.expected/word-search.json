@@ -1,5 +1,9 @@
 {
   "question_uri": "word-search",
+  "wrongFailsOn": {
+    "cpp": 5,
+    "python": 5
+  },
   "cases": [
     {
       "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]]\nword = \"ABCCED\"",

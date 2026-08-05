@@ -1,5 +1,9 @@
 {
   "question_uri": "word-break",
+  "wrongFailsOn": {
+    "cpp": 6,
+    "python": 6
+  },
   "cases": [
     {
       "input": "s = \"leetcode\"\nwordDict = [\"leet\",\"code\"]",

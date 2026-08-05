@@ -1,5 +1,9 @@
 {
   "question_uri": "find-minimum-in-rotated-sorted-array",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "nums = [3,4,5,1,2]",

@@ -1,5 +1,9 @@
 {
   "question_uri": "graph-valid-tree",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "n = 5\nedges = [[0,1],[0,2],[0,3],[1,4]]",

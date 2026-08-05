@@ -1,5 +1,9 @@
 {
   "question_uri": "same-tree",
+  "wrongFailsOn": {
+    "cpp": 1,
+    "python": 1
+  },
   "cases": [
     {
       "input": "p = [1,2,3]\nq = [1,2,3]",

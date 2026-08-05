@@ -1,5 +1,9 @@
 {
   "question_uri": "remove-nth-node-from-end-of-list",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "head = [1,2,3,4,5]\nn = 2",

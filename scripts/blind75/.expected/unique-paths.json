@@ -1,5 +1,9 @@
 {
   "question_uri": "unique-paths",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "m = 3\nn = 7",

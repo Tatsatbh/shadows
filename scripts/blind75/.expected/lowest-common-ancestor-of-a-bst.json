@@ -1,5 +1,9 @@
 {
   "question_uri": "lowest-common-ancestor-of-a-bst",
+  "wrongFailsOn": {
+    "cpp": 1,
+    "python": 1
+  },
   "cases": [
     {
       "input": "root = [6,2,8,0,4,7,9,null,null,3,5]\np = 2\nq = 8",

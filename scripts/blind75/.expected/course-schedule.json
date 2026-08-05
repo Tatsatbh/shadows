@@ -1,5 +1,9 @@
 {
   "question_uri": "course-schedule",
+  "wrongFailsOn": {
+    "cpp": 4,
+    "python": 4
+  },
   "cases": [
     {
       "input": "numCourses = 2\nprerequisites = [[1,0]]",

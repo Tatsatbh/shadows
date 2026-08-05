@@ -1,5 +1,9 @@
 {
   "question_uri": "serialize-and-deserialize-binary-tree",
+  "wrongFailsOn": {
+    "cpp": 4,
+    "python": 4
+  },
   "cases": [
     {
       "input": "root = [1,2,3,null,null,4,5]",

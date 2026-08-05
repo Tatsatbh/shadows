@@ -1,5 +1,9 @@
 {
   "question_uri": "minimum-window-substring",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "s = \"ADOBECODEBANC\"\nt = \"ABC\"",

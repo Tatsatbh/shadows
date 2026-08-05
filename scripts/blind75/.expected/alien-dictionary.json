@@ -1,5 +1,9 @@
 {
   "question_uri": "alien-dictionary",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "words = [\"wrt\",\"wrf\",\"er\",\"ett\",\"rftt\"]",

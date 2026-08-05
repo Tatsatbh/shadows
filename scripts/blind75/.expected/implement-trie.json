@@ -1,5 +1,9 @@
 {
   "question_uri": "implement-trie",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "ops = [\"insert apple\",\"search apple\",\"search app\",\"startsWith app\",\"insert app\",\"search app\"]",

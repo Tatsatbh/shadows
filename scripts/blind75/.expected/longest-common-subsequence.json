@@ -1,5 +1,9 @@
 {
   "question_uri": "longest-common-subsequence",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "text1 = \"abcde\"\ntext2 = \"ace\"",

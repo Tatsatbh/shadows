@@ -1,5 +1,9 @@
 {
   "question_uri": "meeting-rooms-ii",
+  "wrongFailsOn": {
+    "cpp": 6,
+    "python": 6
+  },
   "cases": [
     {
       "input": "intervals = [[0,30],[5,10],[15,20]]",

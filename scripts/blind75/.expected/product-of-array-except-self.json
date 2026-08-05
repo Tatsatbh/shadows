@@ -1,5 +1,9 @@
 {
   "question_uri": "product-of-array-except-self",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "nums = [1,2,3,4]",

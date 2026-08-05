@@ -1,5 +1,9 @@
 {
   "question_uri": "valid-palindrome",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "s = \"A man, a plan, a canal: Panama\"",

@@ -141,27 +141,35 @@ async function verify(q) {
   if (pyStub.status !== 0) problems.push(`python STUB is not valid syntax: ${(pyStub.stderr || '').trim()}`)
 
   // --- the wrong solution must actually fail something -------------------
+  //
+  // Record WHICH case catches it, per language. The Judge0 wrong-solution sweep
+  // then sends exactly that case instead of guessing: picking the largest input
+  // seems reasonable but is often a degenerate one (a uniform grid, a sorted
+  // array) that a wrong solution happens to get right.
+  const wrongFailsOn = {}
   if (q.wrong) {
     const wrongBuild = compileCpp(assemble(q, 'cpp', q.wrong.cpp))
     if (!wrongBuild.ok) {
       problems.push(`cpp WRONG solution does not compile:\n${wrongBuild.err}`)
     } else {
-      let discriminated = false
-      for (const c of cases) {
-        const r = runBin(wrongBuild.bin, c.input)
-        if (!r.ok || r.out !== c.expected_output) { discriminated = true; break }
+      for (let i = 0; i < cases.length; i++) {
+        const r = runBin(wrongBuild.bin, cases[i].input)
+        if (!r.ok || r.out !== cases[i].expected_output) { wrongFailsOn.cpp = i; break }
       }
       wrongBuild.cleanup()
-      if (!discriminated) problems.push('WRONG cpp solution passes every test — tests do not discriminate')
+      if (wrongFailsOn.cpp === undefined) {
+        problems.push('WRONG cpp solution passes every test — tests do not discriminate')
+      }
     }
 
     const wrongPy = assemble(q, 'python', q.wrong.python)
-    let pyDiscriminated = false
-    for (const c of cases) {
-      const r = runPython(wrongPy, c.input)
-      if (!r.ok || r.out !== c.expected_output) { pyDiscriminated = true; break }
+    for (let i = 0; i < cases.length; i++) {
+      const r = runPython(wrongPy, cases[i].input)
+      if (!r.ok || r.out !== cases[i].expected_output) { wrongFailsOn.python = i; break }
     }
-    if (!pyDiscriminated) problems.push('WRONG python solution passes every test — tests do not discriminate')
+    if (wrongFailsOn.python === undefined) {
+      problems.push('WRONG python solution passes every test — tests do not discriminate')
+    }
   }
 
   cppBuild.cleanup()
@@ -170,7 +178,7 @@ async function verify(q) {
     mkdirSync(OUT_DIR, { recursive: true })
     writeFileSync(
       join(OUT_DIR, `${slug}.json`),
-      JSON.stringify({ question_uri: slug, cases }, null, 2)
+      JSON.stringify({ question_uri: slug, wrongFailsOn, cases }, null, 2)
     )
   }
   return { slug, problems, count: cases.length }

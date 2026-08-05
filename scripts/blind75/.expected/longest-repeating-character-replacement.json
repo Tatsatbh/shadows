@@ -1,5 +1,9 @@
 {
   "question_uri": "longest-repeating-character-replacement",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "s = \"ABAB\"\nk = 2",

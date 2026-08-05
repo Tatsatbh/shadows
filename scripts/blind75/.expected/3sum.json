@@ -1,5 +1,9 @@
 {
   "question_uri": "3sum",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "nums = [-1,0,1,2,-1,-4]",

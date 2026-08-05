@@ -1,5 +1,9 @@
 {
   "question_uri": "maximum-product-subarray",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "nums = [2,3,-2,4]",

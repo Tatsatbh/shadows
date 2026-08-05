@@ -1,5 +1,9 @@
 {
   "question_uri": "longest-substring-without-repeating-characters",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
   "cases": [
     {
       "input": "s = \"abcabcbb\"",

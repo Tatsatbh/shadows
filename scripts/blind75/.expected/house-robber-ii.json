@@ -1,5 +1,9 @@
 {
   "question_uri": "house-robber-ii",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "nums = [2,3,2]",

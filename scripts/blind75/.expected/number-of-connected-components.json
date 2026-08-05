@@ -1,5 +1,9 @@
 {
   "question_uri": "number-of-connected-components",
+  "wrongFailsOn": {
+    "cpp": 4,
+    "python": 4
+  },
   "cases": [
     {
       "input": "n = 5\nedges = [[0,1],[1,2],[3,4]]",

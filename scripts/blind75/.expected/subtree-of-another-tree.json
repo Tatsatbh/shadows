@@ -1,5 +1,9 @@
 {
   "question_uri": "subtree-of-another-tree",
+  "wrongFailsOn": {
+    "cpp": 1,
+    "python": 1
+  },
   "cases": [
     {
       "input": "root = [3,4,5,1,2]\nsubRoot = [4,1,2]",

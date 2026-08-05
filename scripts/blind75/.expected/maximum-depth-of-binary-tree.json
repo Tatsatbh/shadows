@@ -1,5 +1,9 @@
 {
   "question_uri": "maximum-depth-of-binary-tree",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
   "cases": [
     {
       "input": "root = [3,9,20,null,null,15,7]",
