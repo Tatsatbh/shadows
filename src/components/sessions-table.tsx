@@ -37,9 +37,21 @@ type Session = Omit<SessionFromDB, 'questions'> & {
 
 interface SessionsTableProps {
   limit?: number
+  /**
+   * 'compact' is for narrow containers such as the dashboard history rail.
+   *
+   * The column hiding below uses sm:/md:, which are VIEWPORT breakpoints. On a
+   * wide screen they never trigger, so every column stayed visible even when the
+   * table was rendered into a ~330px rail: the problem title clamped to "1....",
+   * the date wrapped onto three lines, and the card scrolled sideways. Tailwind
+   * container queries would be the general fix; this is an explicit opt-in that
+   * needs no new dependency.
+   */
+  variant?: 'full' | 'compact'
 }
 
-export function SessionsTable({ limit }: SessionsTableProps) {
+export function SessionsTable({ limit, variant = 'full' }: SessionsTableProps) {
+  const compact = variant === 'compact'
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -90,12 +102,12 @@ export function SessionsTable({ limit }: SessionsTableProps) {
 
   const getDifficultyBadge = (difficulty: string) => {
     const difficultyColors = {
-      Easy: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500',
-      Medium: 'border-amber-500/20 bg-amber-500/10 text-amber-500',
-      Hard: 'border-rose-500/20 bg-rose-500/10 text-rose-500'
+      Easy: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300',
+      Medium: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300',
+      Hard: 'border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-300'
     }
     return (
-      <Badge variant="outline" className={`rounded-[4px] text-[11px] ${difficultyColors[difficulty as keyof typeof difficultyColors]}`}>
+      <Badge variant="outline" className={`font-jetbrains rounded-[5px] text-[10px] uppercase tracking-wide ${difficultyColors[difficulty as keyof typeof difficultyColors]}`}>
         {difficulty}
       </Badge>
     )
@@ -103,21 +115,21 @@ export function SessionsTable({ limit }: SessionsTableProps) {
 
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {
-      completed: 'bg-green-500/15 text-green-500 border-green-500/20',
-      abandoned: 'bg-red-500/10 text-red-500 border-red-500/20',
-      in_progress: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      completed: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-300 border-emerald-500/30',
+      abandoned: 'bg-rose-500/10 text-rose-500 dark:text-rose-300 border-rose-500/30',
+      in_progress: 'bg-[#0b72ff]/10 text-[#0b72ff] dark:text-[#58a0ff] border-[#0b72ff]/30',
     }
 
     const iconWrapperStyles: Record<string, string> = {
-      completed: 'bg-green-500/20',
-      abandoned: 'bg-red-500/20',
-      in_progress: 'bg-blue-500/20',
+      completed: 'bg-emerald-500/20',
+      abandoned: 'bg-rose-500/20',
+      in_progress: 'bg-[#0b72ff]/20',
     }
 
     const displayStatus = status.replace('_', ' ')
 
     return (
-      <Badge variant="outline" className={`rounded-[4px] py-1 pl-1 pr-2.5 text-[11px] capitalize ${statusColors[status] || 'bg-gray-500/10 text-gray-500 border-gray-500/20'} flex items-center gap-2 w-fit`}>
+      <Badge variant="outline" className={`rounded-[5px] py-1 pl-1 pr-2.5 text-[11px] capitalize ${statusColors[status] || 'bg-gray-500/10 text-gray-500 border-gray-500/20'} flex items-center gap-2 w-fit`}>
         <span className={`rounded-[3px] p-1 ${iconWrapperStyles[status] || 'bg-gray-500/20'} flex items-center justify-center`}>
           {status === 'completed' && <Check className="w-3 h-3" />}
           {status === 'in_progress' && <Loader2 className="w-3 h-3 animate-spin" />}
@@ -135,11 +147,11 @@ export function SessionsTable({ limit }: SessionsTableProps) {
   if (!sessions || sessions.length === 0) {
     return (
       <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="mb-4 grid h-12 w-12 place-items-center rounded-[6px] border border-blue-500/25 bg-blue-500/10 text-blue-500">
+        <div className="mb-4 grid h-12 w-12 place-items-center rounded-[6px] border border-[#0b72ff]/40 bg-[#0b72ff]/10 text-[#0877ff] dark:bg-[#04142d] dark:shadow-[0_0_24px_rgba(0,112,255,0.18)]">
           <FileText className="h-5 w-5" />
         </div>
-        <h3 className="mb-1 text-base font-semibold text-foreground">No sessions yet</h3>
-        <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+        <h3 className="mb-1 text-base font-semibold text-foreground dark:text-white">No sessions yet</h3>
+        <p className="max-w-xs text-sm leading-6 text-muted-foreground dark:text-zinc-400">
           Pick a problem above and start your first coding interview session
         </p>
       </div>
@@ -149,13 +161,13 @@ export function SessionsTable({ limit }: SessionsTableProps) {
   return (
     <div className="min-w-0">
       <Table>
-        <TableHeader className="bg-muted/25 dark:bg-white/[0.02]">
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="h-11 px-4 text-[11px] uppercase">Difficulty</TableHead>
-            <TableHead className="h-11 px-4 text-[11px] uppercase">Problem</TableHead>
-            <TableHead className="hidden h-11 px-4 text-[11px] uppercase sm:table-cell">Status</TableHead>
-            <TableHead className="h-11 px-4 text-[11px] uppercase">Started</TableHead>
-            <TableHead className="hidden h-11 px-4 text-right text-[11px] uppercase md:table-cell">Duration</TableHead>
+        <TableHeader className="bg-muted/25 dark:bg-[#0b72ff]/[0.05]">
+          <TableRow className="hover:bg-transparent dark:border-[#0b72ff]/18">
+            {!compact && <TableHead className="font-jetbrains h-11 px-4 text-[10px] uppercase tracking-wider dark:text-zinc-500">Difficulty</TableHead>}
+            <TableHead className="font-jetbrains h-11 px-4 text-[10px] uppercase tracking-wider dark:text-zinc-500">Problem</TableHead>
+            <TableHead className={`font-jetbrains h-11 px-4 text-[10px] uppercase tracking-wider dark:text-zinc-500 ${compact ? '' : 'hidden sm:table-cell'}`}>Status</TableHead>
+            <TableHead className="font-jetbrains h-11 whitespace-nowrap px-4 text-[10px] uppercase tracking-wider dark:text-zinc-500">Started</TableHead>
+            {!compact && <TableHead className="font-jetbrains hidden h-11 px-4 text-right text-[10px] uppercase tracking-wider dark:text-zinc-500 md:table-cell">Duration</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -164,7 +176,7 @@ export function SessionsTable({ limit }: SessionsTableProps) {
             return (
               <TableRow
                 key={session.id}
-                className={isDisabled ? 'h-16 cursor-not-allowed opacity-55' : 'group h-16 cursor-pointer hover:bg-blue-500/[0.045]'}
+                className={`dark:border-[#0b72ff]/14 ${isDisabled ? 'h-16 cursor-not-allowed opacity-55' : 'group h-16 cursor-pointer hover:bg-[#0b72ff]/[0.05]'}`}
                 onClick={() => {
                   if (isDisabled) return
                   if (session.status === 'completed') {
@@ -172,24 +184,33 @@ export function SessionsTable({ limit }: SessionsTableProps) {
                   }
                 }}
               >
-                <TableCell className="px-4 py-4">
-                  {session.questions?.difficulty && getDifficultyBadge(session.questions.difficulty)}
-                </TableCell>
-                <TableCell className="px-4 py-4">
-                  <div className="flex items-center gap-2 font-medium">
-                    <span className="line-clamp-1">
+                {!compact && (
+                  <TableCell className="px-4 py-4">
+                    {session.questions?.difficulty && getDifficultyBadge(session.questions.difficulty)}
+                  </TableCell>
+                )}
+                <TableCell className="w-full max-w-0 px-4 py-4">
+                  {/* min-w-0 on both the flex row and the span: without it a flex
+                      child refuses to shrink below its content and the clamp
+                      never gets a chance to work. */}
+                  <div className="flex min-w-0 items-center gap-2 font-medium">
+                    <span className="min-w-0 truncate">
                       {session.questions?.question_number}. {session.questions?.title}
                     </span>
-                    {!isDisabled && <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />}
+                    {!isDisabled && <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-[#0b72ff] opacity-0 transition-opacity group-hover:opacity-100 dark:text-[#58a0ff]" />}
                   </div>
                 </TableCell>
-                <TableCell className="hidden px-4 py-4 sm:table-cell">
+                <TableCell className={`px-4 py-4 ${compact ? '' : 'hidden sm:table-cell'}`}>
                   {getStatusBadge(session.status)}
                 </TableCell>
-                <TableCell className="px-4 py-4 text-muted-foreground">{formatDate(session.started_at)}</TableCell>
-                <TableCell className="hidden px-4 py-4 text-right font-opencode text-muted-foreground md:table-cell">
-                  {getDuration(session.started_at, session.ended_at)}
+                <TableCell className="whitespace-nowrap px-4 py-4 text-muted-foreground">
+                  {formatDate(session.started_at)}
                 </TableCell>
+                {!compact && (
+                  <TableCell className="font-jetbrains hidden px-4 py-4 text-right text-muted-foreground md:table-cell dark:text-zinc-400">
+                    {getDuration(session.started_at, session.ended_at)}
+                  </TableCell>
+                )}
               </TableRow>
             )
           })}

@@ -1,8 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { ArrowUpRight, PhoneCall } from "lucide-react"
 
@@ -18,9 +15,9 @@ interface InterviewCardProps {
 const DEFAULT_SUMMARY = "Start a voice-led room with live code review and tests."
 
 const difficultyStyles = {
-  Easy: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  Medium: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  Hard: "bg-rose-500/10 text-rose-500 border-rose-500/20",
+  Easy: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+  Medium: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300",
+  Hard: "border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-300",
 }
 
 export function InterviewCard({
@@ -31,50 +28,50 @@ export function InterviewCard({
   onClick,
 }: InterviewCardProps) {
   return (
-    <Card className="group h-full overflow-hidden rounded-[8px] border-border/70 bg-card/90 shadow-none transition-all hover:-translate-y-0.5 hover:border-blue-500/35 hover:shadow-[0_20px_70px_rgba(0,0,0,0.12)] dark:border-white/10 dark:bg-[#05070a]/90 dark:hover:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
-      <CardContent className="flex h-full min-h-[188px] flex-col p-4">
+    <div className="group h-full overflow-hidden rounded-[8px] border border-border bg-card transition hover:-translate-y-0.5 hover:border-[#0b72ff]/45 hover:shadow-[0_16px_50px_rgba(0,0,0,0.1)] dark:border-[#0b72ff]/24 dark:bg-[#061635]/24 dark:hover:border-[#0b72ff]/55 dark:hover:shadow-[0_0_42px_rgba(0,112,255,0.16)]">
+      <div className="flex h-full min-h-[188px] flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-[4px] border-border/70 bg-muted/30 font-opencode text-[11px]">
-              #{questionNumber}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="rounded-[4px] border-blue-500/25 bg-blue-500/10 text-[11px] text-blue-500"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+            <span className="font-pixel grid h-8 min-w-8 place-items-center rounded-[6px] border border-border bg-muted/30 px-1.5 text-xs text-muted-foreground dark:border-[#0b72ff]/40 dark:bg-[#04142d] dark:text-[#0877ff]">
+              {questionNumber}
+            </span>
+            <span className="font-jetbrains inline-flex items-center gap-1.5 rounded-[5px] border border-[#0b72ff]/30 bg-[#0b72ff]/10 px-2 py-1 text-[10px] uppercase tracking-wide text-[#0b72ff] dark:text-[#58a0ff]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0b72ff] opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#0b72ff] dark:shadow-[0_0_10px_rgba(11,114,255,0.9)]" />
               </span>
               Live
-            </Badge>
+            </span>
           </div>
-          <Badge variant="outline" className={cn("rounded-[4px] text-[11px]", difficultyStyles[difficulty])}>
+          <span
+            className={cn(
+              "font-jetbrains rounded-[5px] border px-2 py-1 text-[10px] uppercase tracking-wide",
+              difficultyStyles[difficulty]
+            )}
+          >
             {difficulty}
-          </Badge>
+          </span>
         </div>
 
         <div className="mt-5 flex-1">
-          <h3 className="line-clamp-2 text-base font-semibold leading-6 text-foreground">
+          <h3 className="line-clamp-2 text-base font-semibold leading-6 text-foreground dark:text-white">
             {title}
           </h3>
-          <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
+          <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground dark:text-zinc-400">
             {summary || DEFAULT_SUMMARY}
           </p>
         </div>
 
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
-          className="mt-5 h-9 w-full rounded-[4px] border-border/80 bg-muted/30 text-xs hover:border-blue-500/45 hover:bg-blue-500/10 hover:text-blue-500 dark:border-white/10 dark:bg-white/[0.035]"
           onClick={onClick}
+          className="font-jetbrains mt-5 inline-flex h-9 w-full items-center gap-2 rounded-[6px] border border-border bg-muted/30 px-3 text-xs uppercase tracking-wide text-foreground transition hover:border-[#0b72ff]/50 hover:bg-[#0b72ff]/10 hover:text-[#0b72ff] dark:border-[#0b72ff]/35 dark:bg-[#061635]/45 dark:text-[#58a0ff] dark:hover:border-[#58a0ff]/70 dark:hover:bg-[#0b72ff]/16 dark:hover:shadow-[0_0_24px_rgba(0,112,255,0.2)]"
         >
           <PhoneCall className="h-3 w-3" />
           Join Room
           <ArrowUpRight className="ml-auto h-3.5 w-3.5 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-        </Button>
-      </CardContent>
-    </Card>
+        </button>
+      </div>
+    </div>
   )
 }

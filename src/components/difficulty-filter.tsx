@@ -14,28 +14,33 @@ export function DifficultyFilter({ value, onChange, className }: DifficultyFilte
   const options: { label: DifficultyLevel; activeClass: string; inactiveClass: string }[] = [
     {
       label: "All",
-      activeClass: "bg-black text-white dark:bg-white dark:text-black border-transparent shadow-sm",
-      inactiveClass: "text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground border-transparent"
+      activeClass: "border-[#0b72ff]/50 bg-[#0b72ff]/12 text-[#0b72ff] dark:text-[#58a0ff] dark:shadow-[0_0_20px_rgba(0,112,255,0.18)]",
+      inactiveClass: "border-transparent text-muted-foreground hover:border-[#0b72ff]/30 hover:text-[#0b72ff] dark:hover:text-[#58a0ff]"
     },
     {
       label: "Easy",
-      activeClass: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20",
-      inactiveClass: "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 border-transparent"
+      activeClass: "border-emerald-500/40 bg-emerald-500/12 text-emerald-600 dark:text-emerald-300 dark:shadow-[0_0_20px_rgba(16,185,129,0.14)]",
+      inactiveClass: "border-transparent text-muted-foreground hover:border-emerald-500/30 hover:text-emerald-600 dark:hover:text-emerald-300"
     },
     {
       label: "Medium",
-      activeClass: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 ring-1 ring-amber-500/20",
-      inactiveClass: "text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 border-transparent"
+      activeClass: "border-amber-500/40 bg-amber-500/12 text-amber-600 dark:text-amber-300 dark:shadow-[0_0_20px_rgba(245,158,11,0.14)]",
+      inactiveClass: "border-transparent text-muted-foreground hover:border-amber-500/30 hover:text-amber-600 dark:hover:text-amber-300"
     },
     {
       label: "Hard",
-      activeClass: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 ring-1 ring-rose-500/20",
-      inactiveClass: "text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 border-transparent"
+      activeClass: "border-rose-500/40 bg-rose-500/12 text-rose-500 dark:text-rose-300 dark:shadow-[0_0_20px_rgba(244,63,94,0.14)]",
+      inactiveClass: "border-transparent text-muted-foreground hover:border-rose-500/30 hover:text-rose-500 dark:hover:text-rose-300"
     }
   ]
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div
+      className={cn(
+        "inline-flex flex-wrap items-center gap-1 rounded-[7px] border border-border bg-muted/25 p-1 dark:border-[#0b72ff]/24 dark:bg-[#061635]/28",
+        className
+      )}
+    >
       {options.map((opt) => {
         const isActive = value === opt.label
         return (
@@ -43,7 +48,7 @@ export function DifficultyFilter({ value, onChange, className }: DifficultyFilte
             key={opt.label}
             onClick={() => onChange(opt.label)}
             className={cn(
-              "rounded-full border px-4 py-1.5 text-[13px] font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "font-jetbrains rounded-[5px] border px-3.5 py-1.5 text-[11px] uppercase tracking-wide transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#4a9bff]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               isActive ? opt.activeClass : opt.inactiveClass
             )}
           >

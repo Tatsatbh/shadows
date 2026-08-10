@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function InterviewCardSkeleton() {
     return (
-        <div className="flex h-full min-h-[188px] flex-col gap-4 rounded-[8px] border border-border/70 bg-card/90 p-4 dark:border-white/10 dark:bg-[#05070a]/90">
+        <div className="flex h-full min-h-[188px] flex-col gap-4 rounded-[8px] border border-border bg-card p-4 dark:border-[#0b72ff]/24 dark:bg-[#061635]/24">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-10 rounded-[4px]" />
