@@ -12,6 +12,7 @@ export type SessionStatus = 'in_progress' | 'completed' | 'abandoned'
 export type Visibility = 'private' | 'public' | 'unlisted'
 
 export const DIFFICULTIES: readonly Difficulty[] = ['Easy', 'Medium', 'Hard'] as const
+export const SESSION_STATUSES: readonly SessionStatus[] = ['in_progress', 'completed', 'abandoned'] as const
 
 /** Row aliases, so call sites stop hand-declaring partial shapes. */
 export type QuestionRow = Tables<'questions'>

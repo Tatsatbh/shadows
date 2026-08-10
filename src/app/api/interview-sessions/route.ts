@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { SESSION_STATUSES } from "@/lib/db-types"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -80,6 +81,18 @@ export async function PATCH(request: NextRequest) {
     if (!sessionId || !status) {
       return NextResponse.json(
         { error: "Missing sessionId or status" },
+        { status: 400 }
+      )
+    }
+
+    // status went straight from the request body into the UPDATE, so whatever
+    // string a caller sent reached the database. The CHECK constraint on the
+    // column was the only thing stopping it, and it fails as an opaque driver
+    // error that this handler reports as a 500. Check against the domain union
+    // first so an unknown status is a plain 400 and never reaches the write.
+    if (!SESSION_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status" },
         { status: 400 }
       )
     }
