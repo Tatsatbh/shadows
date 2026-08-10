@@ -116,8 +116,24 @@ export async function GET(request: Request) {
         }
 
         const supabase = await createClient()
+
+        // Polling costs a Judge0 request against the owner's daily quota on
+        // every call, exactly like POST does. The auth check used to sit inside
+        // the persist branch below, so a caller who simply omitted sessionId
+        // reached the upstream fetch unauthenticated — an open proxy onto the
+        // paid plan. Gate before any upstream work.
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
+        // Encoded: tokens lands in the upstream query string, so a raw value
+        // could otherwise smuggle extra Judge0 parameters past the ones set here.
         const res = await fetch(
-            `https://judge0-ce.p.rapidapi.com/submissions/batch?tokens=${tokens}&base64_encoded=true`,
+            `https://judge0-ce.p.rapidapi.com/submissions/batch?tokens=${encodeURIComponent(tokens)}&base64_encoded=true`,
             {
                 headers: {
                     "X-RapidAPI-Key": process.env.JUDGE0_API_KEY!,
