@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 export function NavMain({
   items,
@@ -35,15 +36,27 @@ export function NavMain({
   }[]
 }) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
+    <SidebarGroup className="px-2 py-0">
+      <SidebarGroupLabel className="mb-2 h-6 px-2 font-opencode text-[10px] uppercase tracking-normal text-zinc-500">
+        Platform
+      </SidebarGroupLabel>
+      <SidebarMenu className="gap-1.5">
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={item.isActive}
+                className={cn(
+                  "relative h-10 rounded-[6px] px-3 text-[15px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-zinc-300 dark:hover:bg-white/[0.045] dark:hover:text-white",
+                  "data-[active=true]:bg-muted/50 data-[active=true]:font-medium data-[active=true]:text-foreground dark:data-[active=true]:bg-white/[0.06] dark:data-[active=true]:text-white",
+                  "before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-transparent",
+                  item.isActive && "border border-border/50 bg-muted/50 text-foreground before:bg-blue-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
+                )}
+              >
                 <Link href={item.url}>
-                  <item.icon />
+                  <item.icon className={cn("text-zinc-400", item.isActive && "text-blue-500")} />
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>

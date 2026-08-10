@@ -1,0 +1,69 @@
+{
+  "question_uri": "implement-trie",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
+  "cases": [
+    {
+      "input": "ops = [\"insert apple\",\"search apple\",\"search app\",\"startsWith app\",\"insert app\",\"search app\"]",
+      "expected_output": "4\ntrue\nfalse\ntrue\ntrue",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"search a\"]",
+      "expected_output": "1\nfalse",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"insert a\",\"startsWith a\",\"search a\"]",
+      "expected_output": "2\ntrue\ntrue",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"insert abc\",\"startsWith ab\",\"search ab\"]",
+      "expected_output": "2\ntrue\nfalse",
+      "hidden": false
+    },
+    {
+      "input": "ops = [\"startsWith x\"]",
+      "expected_output": "1\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert hello\",\"insert help\",\"startsWith hel\",\"search hel\",\"search help\"]",
+      "expected_output": "3\ntrue\nfalse\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert a\",\"insert ab\",\"insert abc\",\"search ab\",\"startsWith abc\",\"search abcd\"]",
+      "expected_output": "3\ntrue\ntrue\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert zzz\",\"search zz\",\"startsWith zz\",\"startsWith zzzz\"]",
+      "expected_output": "3\nfalse\ntrue\nfalse",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert word\",\"insert word\",\"search word\"]",
+      "expected_output": "1\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert ab\",\"search a\",\"startsWith a\"]",
+      "expected_output": "2\nfalse\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert 123\",\"search 123\",\"startsWith 12\"]",
+      "expected_output": "2\ntrue\ntrue",
+      "hidden": true
+    },
+    {
+      "input": "ops = [\"insert w0\",\"insert w1\",\"insert w2\",\"insert w3\",\"insert w4\",\"insert w5\",\"insert w6\",\"insert w7\",\"insert w8\",\"insert w9\",\"insert w10\",\"insert w11\",\"insert w12\",\"insert w13\",\"insert w14\",\"insert w15\",\"insert w16\",\"insert w17\",\"insert w18\",\"insert w19\",\"insert w20\",\"insert w21\",\"insert w22\",\"insert w23\",\"insert w24\",\"insert w25\",\"insert w26\",\"insert w27\",\"insert w28\",\"insert w29\",\"insert w30\",\"insert w31\",\"insert w32\",\"insert w33\",\"insert w34\",\"insert w35\",\"insert w36\",\"insert w37\",\"insert w38\",\"insert w39\",\"insert w40\",\"insert w41\",\"insert w42\",\"insert w43\",\"insert w44\",\"insert w45\",\"insert w46\",\"insert w47\",\"insert w48\",\"insert w49\",\"insert w50\",\"insert w51\",\"insert w52\",\"insert w53\",\"insert w54\",\"insert w55\",\"insert w56\",\"insert w57\",\"insert w58\",\"insert w59\",\"insert w60\",\"insert w61\",\"insert w62\",\"insert w63\",\"insert w64\",\"insert w65\",\"insert w66\",\"insert w67\",\"insert w68\",\"insert w69\",\"insert w70\",\"insert w71\",\"insert w72\",\"insert w73\",\"insert w74\",\"insert w75\",\"insert w76\",\"insert w77\",\"insert w78\",\"insert w79\",\"insert w80\",\"insert w81\",\"insert w82\",\"insert w83\",\"insert w84\",\"insert w85\",\"insert w86\",\"insert w87\",\"insert w88\",\"insert w89\",\"insert w90\",\"insert w91\",\"insert w92\",\"insert w93\",\"insert w94\",\"insert w95\",\"insert w96\",\"insert w97\",\"insert w98\",\"insert w99\",\"insert w100\",\"insert w101\",\"insert w102\",\"insert w103\",\"insert w104\",\"insert w105\",\"insert w106\",\"insert w107\",\"insert w108\",\"insert w109\",\"insert w110\",\"insert w111\",\"insert w112\",\"insert w113\",\"insert w114\",\"insert w115\",\"insert w116\",\"insert w117\",\"insert w118\",\"insert w119\",\"insert w120\",\"insert w121\",\"insert w122\",\"insert w123\",\"insert w124\",\"insert w125\",\"insert w126\",\"insert w127\",\"insert w128\",\"insert w129\",\"insert w130\",\"insert w131\",\"insert w132\",\"insert w133\",\"insert w134\",\"insert w135\",\"insert w136\",\"insert w137\",\"insert w138\",\"insert w139\",\"insert w140\",\"insert w141\",\"insert w142\",\"insert w143\",\"insert w144\",\"insert w145\",\"insert w146\",\"insert w147\",\"insert w148\",\"insert w149\",\"insert w150\",\"insert w151\",\"insert w152\",\"insert w153\",\"insert w154\",\"insert w155\",\"insert w156\",\"insert w157\",\"insert w158\",\"insert w159\",\"insert w160\",\"insert w161\",\"insert w162\",\"insert w163\",\"insert w164\",\"insert w165\",\"insert w166\",\"insert w167\",\"insert w168\",\"insert w169\",\"insert w170\",\"insert w171\",\"insert w172\",\"insert w173\",\"insert w174\",\"insert w175\",\"insert w176\",\"insert w177\",\"insert w178\",\"insert w179\",\"insert w180\",\"insert w181\",\"insert w182\",\"insert w183\",\"insert w184\",\"insert w185\",\"insert w186\",\"insert w187\",\"insert w188\",\"insert w189\",\"insert w190\",\"insert w191\",\"insert w192\",\"insert w193\",\"insert w194\",\"insert w195\",\"insert w196\",\"insert w197\",\"insert w198\",\"insert w199\",\"insert w200\",\"insert w201\",\"insert w202\",\"insert w203\",\"insert w204\",\"insert w205\",\"insert w206\",\"insert w207\",\"insert w208\",\"insert w209\",\"insert w210\",\"insert w211\",\"insert w212\",\"insert w213\",\"insert w214\",\"insert w215\",\"insert w216\",\"insert w217\",\"insert w218\",\"insert w219\",\"insert w220\",\"insert w221\",\"insert w222\",\"insert w223\",\"insert w224\",\"insert w225\",\"insert w226\",\"insert w227\",\"insert w228\",\"insert w229\",\"insert w230\",\"insert w231\",\"insert w232\",\"insert w233\",\"insert w234\",\"insert w235\",\"insert w236\",\"insert w237\",\"insert w238\",\"insert w239\",\"insert w240\",\"insert w241\",\"insert w242\",\"insert w243\",\"insert w244\",\"insert w245\",\"insert w246\",\"insert w247\",\"insert w248\",\"insert w249\",\"insert w250\",\"insert w251\",\"insert w252\",\"insert w253\",\"insert w254\",\"insert w255\",\"insert w256\",\"insert w257\",\"insert w258\",\"insert w259\",\"insert w260\",\"insert w261\",\"insert w262\",\"insert w263\",\"insert w264\",\"insert w265\",\"insert w266\",\"insert w267\",\"insert w268\",\"insert w269\",\"insert w270\",\"insert w271\",\"insert w272\",\"insert w273\",\"insert w274\",\"insert w275\",\"insert w276\",\"insert w277\",\"insert w278\",\"insert w279\",\"insert w280\",\"insert w281\",\"insert w282\",\"insert w283\",\"insert w284\",\"insert w285\",\"insert w286\",\"insert w287\",\"insert w288\",\"insert w289\",\"insert w290\",\"insert w291\",\"insert w292\",\"insert w293\",\"insert w294\",\"insert w295\",\"insert w296\",\"insert w297\",\"insert w298\",\"insert w299\",\"search w0\",\"search w1\",\"search w2\",\"search w3\",\"search w4\",\"search w5\",\"search w6\",\"search w7\",\"search w8\",\"search w9\",\"search w10\",\"search w11\",\"search w12\",\"search w13\",\"search w14\",\"search w15\",\"search w16\",\"search w17\",\"search w18\",\"search w19\",\"search w20\",\"search w21\",\"search w22\",\"search w23\",\"search w24\",\"search w25\",\"search w26\",\"search w27\",\"search w28\",\"search w29\",\"search w30\",\"search w31\",\"search w32\",\"search w33\",\"search w34\",\"search w35\",\"search w36\",\"search w37\",\"search w38\",\"search w39\",\"search w40\",\"search w41\",\"search w42\",\"search w43\",\"search w44\",\"search w45\",\"search w46\",\"search w47\",\"search w48\",\"search w49\",\"search w50\",\"search w51\",\"search w52\",\"search w53\",\"search w54\",\"search w55\",\"search w56\",\"search w57\",\"search w58\",\"search w59\",\"search w60\",\"search w61\",\"search w62\",\"search w63\",\"search w64\",\"search w65\",\"search w66\",\"search w67\",\"search w68\",\"search w69\",\"search w70\",\"search w71\",\"search w72\",\"search w73\",\"search w74\",\"search w75\",\"search w76\",\"search w77\",\"search w78\",\"search w79\",\"search w80\",\"search w81\",\"search w82\",\"search w83\",\"search w84\",\"search w85\",\"search w86\",\"search w87\",\"search w88\",\"search w89\",\"search w90\",\"search w91\",\"search w92\",\"search w93\",\"search w94\",\"search w95\",\"search w96\",\"search w97\",\"search w98\",\"search w99\",\"search w100\",\"search w101\",\"search w102\",\"search w103\",\"search w104\",\"search w105\",\"search w106\",\"search w107\",\"search w108\",\"search w109\",\"search w110\",\"search w111\",\"search w112\",\"search w113\",\"search w114\",\"search w115\",\"search w116\",\"search w117\",\"search w118\",\"search w119\",\"search w120\",\"search w121\",\"search w122\",\"search w123\",\"search w124\",\"search w125\",\"search w126\",\"search w127\",\"search w128\",\"search w129\",\"search w130\",\"search w131\",\"search w132\",\"search w133\",\"search w134\",\"search w135\",\"search w136\",\"search w137\",\"search w138\",\"search w139\",\"search w140\",\"search w141\",\"search w142\",\"search w143\",\"search w144\",\"search w145\",\"search w146\",\"search w147\",\"search w148\",\"search w149\",\"search w150\",\"search w151\",\"search w152\",\"search w153\",\"search w154\",\"search w155\",\"search w156\",\"search w157\",\"search w158\",\"search w159\",\"search w160\",\"search w161\",\"search w162\",\"search w163\",\"search w164\",\"search w165\",\"search w166\",\"search w167\",\"search w168\",\"search w169\",\"search w170\",\"search w171\",\"search w172\",\"search w173\",\"search w174\",\"search w175\",\"search w176\",\"search w177\",\"search w178\",\"search w179\",\"search w180\",\"search w181\",\"search w182\",\"search w183\",\"search w184\",\"search w185\",\"search w186\",\"search w187\",\"search w188\",\"search w189\",\"search w190\",\"search w191\",\"search w192\",\"search w193\",\"search w194\",\"search w195\",\"search w196\",\"search w197\",\"search w198\",\"search w199\",\"search w200\",\"search w201\",\"search w202\",\"search w203\",\"search w204\",\"search w205\",\"search w206\",\"search w207\",\"search w208\",\"search w209\",\"search w210\",\"search w211\",\"search w212\",\"search w213\",\"search w214\",\"search w215\",\"search w216\",\"search w217\",\"search w218\",\"search w219\",\"search w220\",\"search w221\",\"search w222\",\"search w223\",\"search w224\",\"search w225\",\"search w226\",\"search w227\",\"search w228\",\"search w229\",\"search w230\",\"search w231\",\"search w232\",\"search w233\",\"search w234\",\"search w235\",\"search w236\",\"search w237\",\"search w238\",\"search w239\",\"search w240\",\"search w241\",\"search w242\",\"search w243\",\"search w244\",\"search w245\",\"search w246\",\"search w247\",\"search w248\",\"search w249\",\"search w250\",\"search w251\",\"search w252\",\"search w253\",\"search w254\",\"search w255\",\"search w256\",\"search w257\",\"search w258\",\"search w259\",\"search w260\",\"search w261\",\"search w262\",\"search w263\",\"search w264\",\"search w265\",\"search w266\",\"search w267\",\"search w268\",\"search w269\",\"search w270\",\"search w271\",\"search w272\",\"search w273\",\"search w274\",\"search w275\",\"search w276\",\"search w277\",\"search w278\",\"search w279\",\"search w280\",\"search w281\",\"search w282\",\"search w283\",\"search w284\",\"search w285\",\"search w286\",\"search w287\",\"search w288\",\"search w289\",\"search w290\",\"search w291\",\"search w292\",\"search w293\",\"search w294\",\"search w295\",\"search w296\",\"search w297\",\"search w298\",\"search w299\",\"startsWith w2\",\"search w300\"]",
+      "expected_output": "302\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse",
+      "hidden": true
+    }
+  ]
+}

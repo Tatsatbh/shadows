@@ -1,0 +1,69 @@
+{
+  "question_uri": "combination-sum-iv",
+  "wrongFailsOn": {
+    "cpp": 0,
+    "python": 0
+  },
+  "cases": [
+    {
+      "input": "nums = [1,2,3]\ntarget = 4",
+      "expected_output": "7",
+      "hidden": false
+    },
+    {
+      "input": "nums = [9]\ntarget = 3",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "nums = [1,2,3]\ntarget = 0",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "nums = [2]\ntarget = 4",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "nums = [1]\ntarget = 1",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "nums = [1,2]\ntarget = 5",
+      "expected_output": "8",
+      "hidden": true
+    },
+    {
+      "input": "nums = [3,33,333]\ntarget = 99",
+      "expected_output": "103",
+      "hidden": true
+    },
+    {
+      "input": "nums = [4,2,1]\ntarget = 32",
+      "expected_output": "39882198",
+      "hidden": true
+    },
+    {
+      "input": "nums = [10,20,30]\ntarget = 15",
+      "expected_output": "0",
+      "hidden": true
+    },
+    {
+      "input": "nums = [1,2,3]\ntarget = 10",
+      "expected_output": "274",
+      "hidden": true
+    },
+    {
+      "input": "nums = [5,10]\ntarget = 20",
+      "expected_output": "5",
+      "hidden": true
+    },
+    {
+      "input": "nums = [1,2,3,4]\ntarget = 25",
+      "expected_output": "7555935",
+      "hidden": true
+    }
+  ]
+}

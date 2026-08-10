@@ -1,0 +1,69 @@
+{
+  "question_uri": "word-break",
+  "wrongFailsOn": {
+    "cpp": 6,
+    "python": 6
+  },
+  "cases": [
+    {
+      "input": "s = \"leetcode\"\nwordDict = [\"leet\",\"code\"]",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "s = \"applepenapple\"\nwordDict = [\"apple\",\"pen\"]",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "s = \"catsandog\"\nwordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]",
+      "expected_output": "false",
+      "hidden": false
+    },
+    {
+      "input": "s = \"a\"\nwordDict = [\"a\"]",
+      "expected_output": "true",
+      "hidden": false
+    },
+    {
+      "input": "s = \"b\"\nwordDict = [\"a\"]",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "s = \"aaaaaaa\"\nwordDict = [\"aaaa\",\"aaa\"]",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "s = \"cars\"\nwordDict = [\"car\",\"ca\",\"rs\"]",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "s = \"abcd\"\nwordDict = [\"a\",\"abc\",\"b\",\"cd\"]",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "s = \"goalspecial\"\nwordDict = [\"go\",\"goal\",\"goals\",\"special\"]",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "s = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\"\nwordDict = [\"a\",\"aa\",\"aaa\",\"aaaa\"]",
+      "expected_output": "false",
+      "hidden": true
+    },
+    {
+      "input": "s = \"bb\"\nwordDict = [\"a\",\"b\",\"bbb\",\"bbbb\"]",
+      "expected_output": "true",
+      "hidden": true
+    },
+    {
+      "input": "s = \"appleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleappleapple\"\nwordDict = [\"apple\",\"pen\",\"app\",\"le\"]",
+      "expected_output": "true",
+      "hidden": true
+    }
+  ]
+}

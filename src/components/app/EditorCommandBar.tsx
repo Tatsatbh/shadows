@@ -35,13 +35,13 @@ export default function EditorCommandBar({
   return (
     <Menubar
       className={cn(
-        "h-9 w-full rounded-none border-none bg-void-elevated px-0 py-4 text-sm border-b border-edge-subtle",
+        "h-9 w-full rounded-none border-0 border-b border-border/60 bg-card/85 backdrop-blur dark:bg-[#05070a]/90 dark:border-white/10 px-0 py-4 text-sm",
         className
       )}
     >
       <div className="flex items-center gap-2 px-2">
         <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="h-7 w-40 rounded-sm bg-transparent py-0 text-xs shadow-none border-none text-light-primary hover:bg-white/5 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 ring-0 ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:font-semibold">
+          <SelectTrigger className="h-7 w-40 rounded-sm bg-transparent py-0 text-xs shadow-none border-none text-foreground hover:bg-white/5 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 ring-0 ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:font-semibold">
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
@@ -60,7 +60,7 @@ export default function EditorCommandBar({
           size="sm"
           type="button"
           variant="ghost"
-          className="h-7 px-3 text-light-primary text-xs bg-transparent hover:bg-white/5 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50 flex items-center gap-1.5"
+          className="h-7 px-3 text-foreground text-xs bg-transparent hover:bg-white/5 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50 flex items-center gap-1.5"
           onClick={onRun}
           disabled={isRunning}
         >

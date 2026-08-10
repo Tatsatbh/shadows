@@ -17,6 +17,8 @@ interface RadarChartProps {
     activeDimension?: number | null
 }
 
+type TextAnchor = "start" | "middle" | "end"
+
 export function RadarChart({
     dimensions,
     size = 280,
@@ -28,7 +30,7 @@ export function RadarChart({
 
     const center = size / 2
     const outerRadius = size * 0.38
-    const innerRadius = size * 0.18 // Increased from 0.12 to 0.18 for more breathing room
+    const innerRadius = size * 0.18
     const radiusRange = outerRadius - innerRadius
     const labelRadius = size * 0.48
 
@@ -40,37 +42,32 @@ export function RadarChart({
         const axisPoints: { x: number; y: number }[] = []
         const axisStartPoints: { x: number; y: number }[] = []
         const dataPoints: { x: number; y: number }[] = []
-        const labelPositions: { x: number; y: number; anchor: string }[] = []
+        const labelPositions: { x: number; y: number; anchor: TextAnchor }[] = []
 
         dimensions.forEach((dim, i) => {
             const angle = startAngle + i * angleStep
             const normalizedScore = dim.score / dim.maxScore
 
-            // Calculate radius based on score, mapping 0 -> innerRadius, 1 -> outerRadius
             const scoreRadius = innerRadius + (normalizedScore * radiusRange)
 
-            // Axis endpoint (full radius)
             axisPoints.push({
                 x: center + outerRadius * Math.cos(angle),
                 y: center + outerRadius * Math.sin(angle)
             })
 
-            // Axis start point (inner radius)
             axisStartPoints.push({
                 x: center + innerRadius * Math.cos(angle),
                 y: center + innerRadius * Math.sin(angle)
             })
 
-            // Data point
             dataPoints.push({
                 x: center + scoreRadius * Math.cos(angle),
                 y: center + scoreRadius * Math.sin(angle)
             })
 
-            // Label position (outside the chart)
             const lx = center + labelRadius * Math.cos(angle)
             const ly = center + labelRadius * Math.sin(angle)
-            let anchor = "middle"
+            let anchor: TextAnchor = "middle"
             if (Math.cos(angle) < -0.1) anchor = "end"
             else if (Math.cos(angle) > 0.1) anchor = "start"
 
@@ -80,7 +77,6 @@ export function RadarChart({
         return { axisPoints, dataPoints, labelPositions, axisStartPoints }
     }, [dimensions, center, outerRadius, innerRadius, radiusRange, labelRadius])
 
-    // Create SVG path for data polygon
     const dataPath = useMemo(() => {
         if (dataPoints.length === 0) return ""
         return dataPoints
@@ -88,13 +84,11 @@ export function RadarChart({
             .join(" ") + " Z"
     }, [dataPoints])
 
-    // Calculate average score for color
     const avgScore = useMemo(() => {
         const total = dimensions.reduce((sum, d) => sum + d.score / d.maxScore, 0)
         return total / dimensions.length
     }, [dimensions])
 
-    // Gradient colors based on performance
     const gradientId = `radar-gradient-${size}`
     const glowId = `radar-glow-${size}`
 
@@ -102,8 +96,8 @@ export function RadarChart({
         const ratio = score / maxScore
         if (ratio >= 0.8) return "text-emerald-400"
         if (ratio >= 0.6) return "text-blue-400"
-        if (ratio >= 0.4) return "text-yellow-400"
-        return "text-red-400"
+        if (ratio >= 0.4) return "text-amber-400"
+        return "text-rose-400"
     }
 
     return (
@@ -114,25 +108,25 @@ export function RadarChart({
                     <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                         {avgScore >= 0.6 ? (
                             <>
-                                <stop offset="0%" stopColor="rgb(52, 211, 153)" stopOpacity="0.8" />
-                                <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0.6" />
+                                <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.8" />
+                                <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.55" />
                             </>
                         ) : avgScore >= 0.4 ? (
                             <>
-                                <stop offset="0%" stopColor="rgb(251, 191, 36)" stopOpacity="0.8" />
-                                <stop offset="100%" stopColor="rgb(249, 115, 22)" stopOpacity="0.6" />
+                                <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.65" />
+                                <stop offset="100%" stopColor="rgb(245, 158, 11)" stopOpacity="0.55" />
                             </>
                         ) : (
                             <>
-                                <stop offset="0%" stopColor="rgb(248, 113, 113)" stopOpacity="0.8" />
-                                <stop offset="100%" stopColor="rgb(239, 68, 68)" stopOpacity="0.6" />
+                                <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.5" />
+                                <stop offset="100%" stopColor="rgb(244, 63, 94)" stopOpacity="0.55" />
                             </>
                         )}
                     </linearGradient>
 
                     {/* Glow filter */}
                     <filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="8" result="coloredBlur" />
+                        <feGaussianBlur stdDeviation="5" result="coloredBlur" />
                         <feMerge>
                             <feMergeNode in="coloredBlur" />
                             <feMergeNode in="SourceGraphic" />
@@ -142,9 +136,7 @@ export function RadarChart({
 
                 {/* Background rings */}
                 {[0.2, 0.4, 0.6, 0.8, 1].map((progress, i) => {
-                    // Interpolate radius for each ring
                     const ringRadius = innerRadius + (progress * radiusRange)
-                    // Create points for the ring
                     const ringPoints = axisPoints.map((_, idx) => {
                         const angle = (-Math.PI / 2) + idx * ((2 * Math.PI) / dimensions.length)
                         return `${center + ringRadius * Math.cos(angle)},${center + ringRadius * Math.sin(angle)}`
@@ -180,7 +172,7 @@ export function RadarChart({
                 <motion.path
                     d={dataPath}
                     fill={`url(#${gradientId})`}
-                    stroke={avgScore >= 0.6 ? "rgb(52, 211, 153)" : avgScore >= 0.4 ? "rgb(251, 191, 36)" : "rgb(248, 113, 113)"}
+                    stroke={avgScore >= 0.6 ? "rgb(59, 130, 246)" : avgScore >= 0.4 ? "rgb(245, 158, 11)" : "rgb(244, 63, 94)"}
                     strokeWidth="2"
                     filter={`url(#${glowId})`}
                     initial={animated ? { opacity: 0, scale: 0.5 } : undefined}
@@ -196,7 +188,7 @@ export function RadarChart({
                         cx={point.x}
                         cy={point.y}
                         r={hoveredIndex === i || activeDimension === i ? 8 : 5}
-                        fill={avgScore >= 0.6 ? "rgb(52, 211, 153)" : avgScore >= 0.4 ? "rgb(251, 191, 36)" : "rgb(248, 113, 113)"}
+                        fill={avgScore >= 0.6 ? "rgb(59, 130, 246)" : avgScore >= 0.4 ? "rgb(245, 158, 11)" : "rgb(244, 63, 94)"}
                         stroke="white"
                         strokeWidth="2"
                         className="cursor-pointer transition-all"

@@ -1,0 +1,69 @@
+{
+  "question_uri": "decode-ways",
+  "wrongFailsOn": {
+    "cpp": 2,
+    "python": 2
+  },
+  "cases": [
+    {
+      "input": "s = \"12\"",
+      "expected_output": "2",
+      "hidden": false
+    },
+    {
+      "input": "s = \"226\"",
+      "expected_output": "3",
+      "hidden": false
+    },
+    {
+      "input": "s = \"06\"",
+      "expected_output": "0",
+      "hidden": false
+    },
+    {
+      "input": "s = \"1\"",
+      "expected_output": "1",
+      "hidden": false
+    },
+    {
+      "input": "s = \"0\"",
+      "expected_output": "0",
+      "hidden": true
+    },
+    {
+      "input": "s = \"10\"",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "s = \"27\"",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "s = \"100\"",
+      "expected_output": "0",
+      "hidden": true
+    },
+    {
+      "input": "s = \"2101\"",
+      "expected_output": "1",
+      "hidden": true
+    },
+    {
+      "input": "s = \"11106\"",
+      "expected_output": "2",
+      "hidden": true
+    },
+    {
+      "input": "s = \"111111111111111111111111\"",
+      "expected_output": "75025",
+      "hidden": true
+    },
+    {
+      "input": "s = \"11111111111111111111111111111111111111113333333333333333333333333333333333333333\"",
+      "expected_output": "267914296",
+      "hidden": true
+    }
+  ]
+}

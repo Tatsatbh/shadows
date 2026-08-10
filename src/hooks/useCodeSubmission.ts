@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useRef } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import { useSubmissionStore, type TestCaseMetadata } from "@/store"
 
 export type TestCaseStatus = "pending" | "passed" | "failed" | "running"
@@ -13,8 +13,9 @@ export interface TestCaseResult {
 
 export interface StarterCode {
   code: string
-  imports?: string
-  main?: string
+  // Nullable in the schema, and the assembly below already drops falsy parts.
+  imports?: string | null
+  main?: string | null
 }
 
 export interface UseCodeSubmissionOptions {
@@ -55,7 +56,32 @@ export function useCodeSubmission({
   const [isRunning, setIsRunning] = useState(false)
   const [output, setOutput] = useState("")
   const setLatestSubmission = useSubmissionStore((s) => s.setLatestSubmission)
+  const resetSubmission = useSubmissionStore((s) => s.resetSubmission)
   const testCaseMetadataRef = useRef(testCaseMetadata)
+
+  // The submission store is module scoped and survives client navigation, so a
+  // new interview starts holding the previous question's results — which the
+  // voice agent then reads as if they were the current problem's. Clear them
+  // whenever the interview changes.
+  useEffect(() => {
+    resetSubmission()
+    setTestCaseResults([])
+  }, [sessionId, questionUri, resetSubmission])
+
+  // Guards against overlapping runs. `isRunning` is state, so it is stale
+  // inside the async body and cannot prevent a second run being started (for
+  // example by holding Cmd+Enter), each of which costs a full Judge0 batch.
+  const inFlightRef = useRef(false)
+
+  // Set on unmount so the poll loop stops instead of calling setState on an
+  // unmounted component and leaking a request cycle per abandoned submission.
+  const cancelledRef = useRef(false)
+  useEffect(() => {
+    cancelledRef.current = false
+    return () => {
+      cancelledRef.current = true
+    }
+  }, [])
 
   const runCode = useCallback(
     async (code: string, language: string, starterCode: StarterCode | undefined) => {
@@ -64,6 +90,9 @@ export function useCodeSubmission({
         setOutput(`Unsupported language: ${language}`)
         return
       }
+
+      if (inFlightRef.current) return
+      inFlightRef.current = true
 
       setIsRunning(true)
       setOutput("Submitting code...")
@@ -108,11 +137,18 @@ export function useCodeSubmission({
         }))
         setTestCaseResults(initialResults)
 
-        const maxAttempts = 10
+        // 10 attempts x 1500ms capped the wait at 15s. A cold compile plus a
+        // dozen stress cases regularly exceeds that, and the run was then
+        // discarded — Judge0 quota already spent, no result shown, and nothing
+        // written to `submissions`. 40 x 1500ms gives a 60s ceiling.
+        const maxAttempts = 40
         const pollInterval = 1500
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
           await new Promise((resolve) => setTimeout(resolve, pollInterval))
+
+          // Stop polling if the interview page went away mid-run.
+          if (cancelledRef.current) return
 
           // Pass all required data for saving submission
           const queryParams = new URLSearchParams({
@@ -187,6 +223,7 @@ export function useCodeSubmission({
         console.error("runCode error:", error)
         setOutput("Error running code. Please try again.")
       } finally {
+        inFlightRef.current = false
         setIsRunning(false)
       }
     },

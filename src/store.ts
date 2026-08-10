@@ -18,11 +18,10 @@ export interface TestCaseResult {
   stderr?: string
 }
 
-export interface TestCaseMetadata {
-  input: string
-  expectedOutput: string
-  hidden: boolean
-}
+// Re-exported from the shared module so the panel and the agent store stop
+// declaring two different shapes under one name.
+export type { TestCaseMetadata } from "@/lib/db-types"
+import type { TestCaseMetadata } from "@/lib/db-types"
 
 export interface LatestSubmissionResult {
   timestamp: number
@@ -39,6 +38,13 @@ export interface LatestSubmissionResult {
 type SubmissionStore = {
   latestSubmission: LatestSubmissionResult | null
   setLatestSubmission: (submission: LatestSubmissionResult | null) => void
+  /**
+   * Clear results between interviews. This store lives at module scope, so
+   * without an explicit reset the previous question's results survive client
+   * navigation and getTestResultsForAgent() reports them to the voice agent as
+   * if they belonged to the current problem.
+   */
+  resetSubmission: () => void
   // Agent tool: get formatted test results for LLM consumption
   getTestResultsForAgent: () => string
 }
@@ -46,6 +52,7 @@ type SubmissionStore = {
 export const useSubmissionStore = create<SubmissionStore>((set, get) => ({
   latestSubmission: null,
   setLatestSubmission: (submission) => set({ latestSubmission: submission }),
+  resetSubmission: () => set({ latestSubmission: null }),
   getTestResultsForAgent: () => {
     const { latestSubmission } = get()
     if (!latestSubmission) {
@@ -65,7 +72,7 @@ export const useSubmissionStore = create<SubmissionStore>((set, get) => ({
       } else {
         output += `\n${statusEmoji} Test ${idx + 1}: ${result.status}`
         output += `\n   Input: ${tc?.input || "N/A"}`
-        output += `\n   Expected: ${tc?.expectedOutput || "N/A"}`
+        output += `\n   Expected: ${tc?.expected_output || "N/A"}`
         if (result.status === "failed" && result.actualOutput) {
           output += `\n   Actual: ${result.actualOutput}`
         }

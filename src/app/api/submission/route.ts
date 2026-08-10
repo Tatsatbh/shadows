@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabaseClient'
 
 interface SubmissionRequest {
     judgeId: number
@@ -23,6 +24,19 @@ export async function POST(request: Request) {
         }
 
         const supabase = await createClient()
+
+        // Executing code costs Judge0 quota on the owner's paid plan, so the
+        // caller must be signed in. (RLS on test_cases already made anonymous
+        // calls fail with a confusing 404; this rejects them honestly and
+        // before any upstream work.)
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { data: question, error: questionError } = await supabase
             .from('questions')
             .select('id')
@@ -33,7 +47,10 @@ export async function POST(request: Request) {
             return Response.json({ error: "Question not found" }, { status: 404 })
         }
 
-        const { data: testCases, error: testCasesError } = await supabase
+        // Service role: RLS hides `hidden` rows from clients, but the judge has
+        // to run all of them. Auth and question resolution above still go
+        // through the caller's own session.
+        const { data: testCases, error: testCasesError } = await supabaseAdmin()
             .from('test_cases')
             .select('input, expected_output, hidden')
             .eq('question_id', question.id)
@@ -99,8 +116,24 @@ export async function GET(request: Request) {
         }
 
         const supabase = await createClient()
+
+        // Polling costs a Judge0 request against the owner's daily quota on
+        // every call, exactly like POST does. The auth check used to sit inside
+        // the persist branch below, so a caller who simply omitted sessionId
+        // reached the upstream fetch unauthenticated — an open proxy onto the
+        // paid plan. Gate before any upstream work.
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
+        // Encoded: tokens lands in the upstream query string, so a raw value
+        // could otherwise smuggle extra Judge0 parameters past the ones set here.
         const res = await fetch(
-            `https://judge0-ce.p.rapidapi.com/submissions/batch?tokens=${tokens}&base64_encoded=true`,
+            `https://judge0-ce.p.rapidapi.com/submissions/batch?tokens=${encodeURIComponent(tokens)}&base64_encoded=true`,
             {
                 headers: {
                     "X-RapidAPI-Key": process.env.JUDGE0_API_KEY!,
@@ -120,7 +153,27 @@ export async function GET(request: Request) {
             
             if (allDone) {
                 const { data: { user } } = await supabase.auth.getUser()
-                
+
+                // session_id and code arrive as query parameters, so without
+                // this check any caller could attach a submission row to
+                // someone else's session. Only persist into a session the
+                // caller actually owns.
+                if (!user) {
+                    return Response.json(judgeResponse)
+                }
+
+                const { data: ownedSession } = await supabase
+                    .from('sessions')
+                    .select('id')
+                    .eq('id', sessionId)
+                    .eq('user_id', user.id)
+                    .maybeSingle()
+
+                if (!ownedSession) {
+                    console.warn('Refusing to persist submission for a session the caller does not own')
+                    return Response.json(judgeResponse)
+                }
+
                 const MAX_ERROR_LENGTH = 500
                 const decodedSubmissions = judgeResponse.submissions.map((sub: any) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
