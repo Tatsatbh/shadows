@@ -1,0 +1,29 @@
+-- profiles.credits defaulted to 3, and handle_new_user() inserts a profile row
+-- without naming the column, so every account created anywhere arrived holding
+-- three interviews.
+--
+-- A credit is real money: it buys an OpenAI Realtime audio session, a
+-- gpt-5-mini grading pass at reasoning_effort 'high', and a batch of Judge0
+-- executions against the owner's paid plans. a87588a hid the signup control in
+-- the UI, but /auth/v1/signup stays open to anyone holding the anon key — which
+-- ships in the client bundle — so the endpoint, not the button, is what decides
+-- who gets an account. Probing it returns a password-strength complaint rather
+-- than signup_disabled, confirming it accepts registrations. Scripting it minted
+-- free spend three interviews at a time.
+--
+-- New accounts now start empty, so an account is worth nothing until it is
+-- deliberately funded. That makes the closed beta actually closed regardless of
+-- what the auth endpoint allows, rather than relying on a hidden button.
+--
+-- Existing accounts are untouched: this changes the default for future inserts
+-- only. Grant credits with the service role, e.g.
+--   update public.profiles set credits = 3 where id = '<user uuid>';
+-- Users cannot write the column themselves — 20260803014758 removed it from the
+-- authenticated grant.
+--
+-- Note there is no self-serve purchase flow yet: UpgradeScreen renders pricing
+-- but no checkout. Until one exists, a funded account is a manual step, and a
+-- new user with zero credits gets the 'Insufficient credits' 402 from
+-- start_session on their first attempt.
+
+alter table public.profiles alter column credits set default 0;
