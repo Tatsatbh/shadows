@@ -215,7 +215,10 @@ Return your response as a JSON object with this structure:
 
   const scorecard = JSON.parse(completion.choices[0].message.content || '{}');
 
-  const { error: updateError } = await supabase
+  // Service role: the scorecard is deliberately not user-writable, so signed-in
+  // callers cannot update these columns and forge a report. Ownership of this
+  // session was already verified above, so writing here is scoped to the caller.
+  const { error: updateError } = await supabaseAdmin()
     .from('sessions')
     .update({
       status: 'completed',
