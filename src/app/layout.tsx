@@ -5,23 +5,65 @@ import Providers from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/next"
 
+const siteDescription =
+  "Practice live technical interviews with an adaptive AI interviewer that talks with you, watches you code, runs your solution, and gives instant feedback."
+
 export const metadata: Metadata = {
-  title: "Shadows",
-  description: "AI technical phone screens for software engineers",
+  metadataBase: new URL("https://shadows.sh"),
+  title: {
+    default: "Shadows — AI Technical Phone Screens for Software Engineers",
+    template: "%s | Shadows",
+  },
+  description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Shadows",
-    description: "AI technical phone screens for software engineers",
+    type: "website",
+    url: "https://shadows.sh",
+    title: "Shadows — AI Technical Phone Screens for Software Engineers",
+    description: siteDescription,
     siteName: "Shadows",
+    images: [
+      {
+        url: "/meta.png",
+        width: 3840,
+        height: 2160,
+        alt: "Shadows — live AI coding interviews",
+      },
+    ],
   },
   twitter: {
-    title: "Shadows",
-    description: "AI technical phone screens for software engineers",
+    card: "summary_large_image",
+    title: "Shadows — AI Technical Phone Screens for Software Engineers",
+    description: siteDescription,
+    images: ["/meta.png"],
   },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Shadows",
+  url: "https://shadows.sh",
+  logo: "https://shadows.sh/favicon.svg",
+  description: "AI technical phone screens for software engineers",
+  sameAs: ["https://github.com/Tatsatbh/shadows"],
 };
 
 export default function RootLayout({
@@ -36,6 +78,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.svg" />
       </head>
       <body className={`antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <Providers>
           {children}
           <Analytics />
